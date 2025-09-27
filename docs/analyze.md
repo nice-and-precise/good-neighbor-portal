@@ -1,7 +1,7 @@
 # Cross-Artifact Analysis — Good Neighbor Portal (MVP)
 
 Artifacts reviewed: docs/constitution.md, docs/spec.md, docs/decisions.md, docs/plan.md, docs/tasks.md
-Date: 2025-09-26
+Date: 2025-09-27
 
 ## Summary
 - Overall alignment is strong: zero‑cloud local demo, Windows‑first with PowerShell, PHP 8.1+, SQLite default, vanilla HTML/CSS/JS, deterministic demo behaviors, i18n en/es, and multi‑tenant decision applied.
@@ -12,13 +12,13 @@ Date: 2025-09-26
 - FR-002 Next pickup + calendar: Covered (Plan §3/§4, Tasks M3)
 - FR-003 Billing history + demo pay: Covered (Plan §3/§4, §7, Tasks M3)
 - FR-004 Service requests CRUD: Covered (Plan §4/§5, Tasks M4)
-- FR-005 FAQs + announcements: PARTIAL — Plan mentions static section; explicit task added (Tasks M3)
+- FR-005 FAQs + announcements: Covered (index.html section + i18n strings; Tasks M3 notes)
 - FR-006 Language toggle (en + one alt): Covered (Plan §6, Tasks M7)
 - FR-007 Staff queue with statuses: Covered (Plan §5, Tasks M5)
 - FR-008 Update statuses + notes: Covered (Plan §5, Tasks M5)
 - FR-009 Route summary + CSV export: Covered (Plan §8, Tasks M6)
 - FR-010 Recent activity feed: Covered (Plan §5, Tasks M5)
-- FR-011 Mobile-responsive + accessible: PARTIAL — Principles present; explicit a11y/mobile tasks added (Tasks M7)
+- FR-011 Mobile-responsive + accessible: PARTIAL — Principles present; explicit a11y/mobile tasks added (Tasks M7); basic responsiveness validated in web audit.
 - FR-012 Validation + prepared statements: Covered (Plan §2/§4, Tasks M1/M7 tests)
 - FR-013 One-command demo reset: Covered (Plan §7, Tasks M1 scripts)
 - FR-014 Start <10s + offline: Covered; add smoke check (Tasks M7 tests)

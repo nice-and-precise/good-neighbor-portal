@@ -26,6 +26,7 @@ These are demo-only surfaces. They require a valid session and the demo staff he
 - POST /api/request_status_update.php { id, action } → Transitions a request status. Allowed actions: ack, in_progress, done, cancelled.
 - POST /api/request_note_create.php { request_id, note } → Adds a staff note to a request.
 - GET /api/request_notes.php?request_id=ID → Lists staff notes for a request (includes staff_name and created_at).
+- GET /api/staff_queue.php?status=new|ack|in_progress|done|cancelled → Returns a list of requests for staff triage.
 
 Security & Headers
 - CSRF: All POST endpoints require `X-CSRF` header with the token from /api/csrf.php.

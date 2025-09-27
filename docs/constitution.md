@@ -44,7 +44,7 @@ We are building the "Good Neighbor Portal" prototype for West Central Sanitation
 
 ### Stack Requirements
 - **Backend:** PHP 8.1+ with type hints, built-in server for demos
-- **Database:** MySQL 8 (SQLite fallback for simplicity)
+- **Database:** SQLite (default) with MySQL 8 optional via DSN
 - **Frontend:** Vanilla HTML/CSS/JS with light routing (avoid heavy frameworks unless justified)
 - **Testing:** Include 1-2 fast unit tests with new code
 - **Scripts:** PowerShell and Bash variants required

@@ -134,56 +134,51 @@ $m1 = CheckItems @{
 }
 $m1.gitignore = (Get-Content -Raw .gitignore | Select-String -SimpleMatch "config/app.env","/data/app.db","logs/","tmp/","exports/" | Measure-Object).Count -ge 5
 
-# M2
+# M2 (Auth + Tenant Switcher) — align with SPA+endpoints architecture
 $m2 = CheckItems @{
-  models = @("src/Model/UserModel.php","src/Model/MagicLinkModel.php","src/Model/NeighborhoodModel.php")
-  controller = "src/Controller/AuthController.php"
-  view = "public/auth_login.php"
-  tenantsEndpoint = "public/api/tenants.php"
-  sessionEndpoint = "public/api/session.php"
+  endpoints = @(
+    "public/api/csrf.php",
+    "public/api/tenants.php",
+    "public/api/auth_request.php",
+    "public/api/auth_verify.php",
+    "public/api/session.php",
+    "public/api/logout.php"
+  )
+  spa = "public/index.html"
 }
 
-# M3
+# M3 (Resident Dashboard + Billing)
 $m3 = CheckItems @{
-  models = @("src/Model/ScheduleModel.php","src/Model/BillingModel.php")
-  controller = "src/Controller/ResidentController.php"
-  dashboardView = "public/resident_dashboard.php"
-  billingView = "public/resident_billing.php"
+  dashboardEndpoint = "public/api/dashboard.php"
   billingEndpoint = "public/api/billing_get.php"
+  payDemo = "public/api/pay_demo.php"
 }
 
-# M4
+# M4 (Service Requests + Confirmations)
 $m4 = CheckItems @{
-  requestModel = "src/Model/RequestModel.php"
-  newView = "public/resident_request_new.php"
   createEndpoint = "public/api/request_create.php"
-  statusTracking = "public/api/request_get.php"
+  getEndpoint = "public/api/request_get.php"
 }
 
-# M5
+# M5 (Staff Queue + Notes + Polling)
 $m5 = CheckItems @{
-  staffController = "src/Controller/StaffController.php"
-  queueView = "public/staff_queue.php"
   queueEndpoint = "public/api/staff_queue.php"
   statusUpdate = "public/api/request_status_update.php"
   notesCreate = "public/api/request_note_create.php"
+  notesList = "public/api/request_notes.php"
 }
 # CSRF and logging static signal
 $m5_csrf = (Get-Content -Raw "src/Lib/Http.php" 2>$null) -match "X-CSRF"
-$m5_log = (Get-Content -Raw "src/Lib/Util.php" 2>$null) -match "log"  # heuristic
+$m5_log = (Get-Content -Raw "src/Lib/Util.php" 2>$null) -match "log"
 
-# M6
+# M6 (Route Summary + CSV)
 $m6 = CheckItems @{
-  routeModel = "src/Model/RouteModel.php"
-  exportController = "src/Controller/ExportController.php"
-  csvUtil = "src/Lib/Csv.php"
   csvEndpoint = "public/api/route_summary.csv.php"
 }
 
-# M7
+# M7 (i18n + Toggle + Tests)
 $m7 = CheckItems @{
   i18nFiles = @("public/i18n/en.json","public/i18n/es.json")
-  i18nLib = "src/Lib/I18n.php"
   toggleEndpoint = "public/api/i18n_switch.php"
   smoke = "tests/smoke.ps1"
   unit = "tests/unit/validator_test.php"

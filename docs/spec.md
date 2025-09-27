@@ -27,7 +27,7 @@ West Central Sanitation needs a demo-ready MVP portal that runs entirely on a de
 - **FR-004**: Residents MUST be able to submit service requests (bulk pickup, start/stop service, container swap, issue report)
 - **FR-005**: System MUST display FAQs and announcements section
 - **FR-006**: System MUST support language toggle between English and one alternate language
-- **FR-007**: Staff MUST be able to view request queue with statuses: New, In review, Scheduled, Done
+- **FR-007**: Staff MUST be able to view request queue (demo statuses: new, ack, in_progress, done, cancelled)
 - **FR-008**: Staff MUST be able to update request statuses and leave short notes
 - **FR-009**: System MUST provide route summary view with counts by service day and CSV export
 - **FR-010**: System MUST display recent activity feed for internal dashboard
