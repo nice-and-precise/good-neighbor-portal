@@ -11,42 +11,36 @@ Reference: docs/plan.md, docs/spec.md, docs/decisions.md
 - Reset guard: in reset-demo.ps1, detect if PHP server is running on :8080 (port/process check). If active, abort with clear message.
 - Optional (parity): add bash equivalents for setup/run/reset/export in scripts/bash/ (can be deferred if Windows-only MVP)
 
-## M2: Auth + Neighborhood Switcher
-- Models: UserModel.php, MagicLinkModel.php, NeighborhoodModel.php
-- Controllers: AuthController.php (magic-link), AdminController.php (optional demo controls)
-- Views: auth_login.php (request link, show token URL)
-- Public routes in index.php for magic-link request/login, logout
-- Neighborhood switcher in layout header; persist selection in session
+## M2: Auth + Tenant Switcher (SPA)
+- SPA login in `public/index.html` + `public/app.js`
+- JSON endpoints: `public/api/` for csrf, tenants, auth_request, auth_verify, session, logout
+- Tenant switcher in SPA; persist selection in session
 
 ## M3: Resident Dashboard + Billing Demo
-- Models: ScheduleModel.php, BillingModel.php
-- Controllers: ResidentController.php
-- Views: resident_dashboard.php (next pickup, calendar), resident_billing.php (history, demo pay)
-- Deterministic pay endpoint; sandbox messaging
-- Add FAQs/announcements static section/page (FR-005) linked from dashboard
+- SPA dashboard UI: next pickup, billing history (implemented)
+- Endpoint `GET /api/dashboard.php` (implemented)
+- Deterministic pay endpoint; sandbox messaging (planned)
+- FAQs/announcements static section/page (FR-005) (planned)
 
 ## M4: Service Requests + Confirmations
-- Model: RequestModel.php
-- Views: resident_request_new.php
-- Controller endpoints to create request; confirmation ID display
+- Endpoints: request_create, request_get (implemented)
+- SPA form for new request; show confirmation ID in UI (implemented)
 
 ## M5: Staff Queue + Notes + Polling
-- Controllers: StaffController.php
-- Views: staff_queue.php, staff_dashboard.php (recent activity)
-- Polling JS (~5s) for queue refresh
-- Status update + notes endpoint
-- Security: add CSRF token on forms + validate in POST handlers; add sanitized error logging to file (no PII)
+- Staff transitions and notes endpoints (implemented)
+- SPA request detail view shows staff controls and notes with polling (implemented)
+- Staff queue list endpoint/UI (pending)
+- Security: CSRF token on writes (implemented); add sanitized error logging to file (pending)
 
 ## M6: Route Summary + CSV Export
-- Model: RouteModel.php
-- Controller: ExportController.php; CSV builder (Lib/Csv.php)
-- Columns: service_day, neighborhood_name, route_name, pickup_count, area_code, generated_at
+- Endpoint: `/api/route_summary.csv` (pending)
+- CSV columns: service_day, neighborhood_name, route_name, pickup_count, area_code, generated_at
 
 ## M7: i18n + Toggle + Smoke Tests
-- i18n/en.json, i18n/es.json; Lib/I18n.php; toggle endpoint and JS
-- tests/smoke.ps1: full flow
-- tests/unit/validator_test.php
-- A11y & Mobile: sweep for labels, contrast, keyboard nav, skip links; verify responsive at common breakpoints (mobile/desktop). Capture a quick checklist in docs or README.
+- i18n/en.json, i18n/es.json; toggle API and SPA wiring (pending)
+- tests/smoke.ps1: full flow (pending)
+- tests/unit/validator_test.php (pending)
+- A11y & Mobile: sweep + checklist; verify responsive (ongoing). CI web audit added (screenshots, DOM, a11y, console, network)
 
 ## Acceptance Checklists
 - Validate FR-001..FR-014 via manual smoke + scripts

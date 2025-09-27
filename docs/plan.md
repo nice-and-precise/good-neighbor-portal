@@ -17,9 +17,10 @@ Inputs: docs/constitution.md, docs/spec.md, docs/decisions.md
 ## 2) Architecture Overview
 - Backend: PHP 8.1+ (built‑in server)
 - Data: SQLite default (PDO) with MySQL optional via DSN
-- Frontend: Vanilla HTML/CSS/JS; hash router
+- Frontend: Single‑page app (SPA) served from `public/index.html` + `public/app.js` using hash routing
+- API: JSON endpoints under `public/api/*.php` consumed by the SPA
 - Sessions: PHP session; magic‑link token table with TTL
-- i18n: JSON resources (en, es); runtime toggle with fetch
+- i18n: JSON resources (en, es); runtime toggle with fetch (planned)
 - Scripts: PowerShell‑first (setup/run/reset/export)
 
 ## 3) Data Model (SQLite)
@@ -33,29 +34,42 @@ Inputs: docs/constitution.md, docs/spec.md, docs/decisions.md
 - routes(id, neighborhood_id, service_day, route_name, area_code)
 - route_stats(id, route_id, service_day, pickup_count, generated_at)
 
-## 4) Routes (Current M2 implementation)
-- GET / → Login page (public/index.php)
+## 4) Routes (Current reality + planned)
+
+SPA entry:
+- GET / → `public/index.php` serves `index.html` SPA
+
+Auth/session/tenant:
 - GET /api/csrf.php → CSRF token
-- GET /api/tenants.php → tenant list
+- GET /api/tenants.php → tenant list (+ active)
 - POST /api/auth_request.php → create token (demo returns it)
 - POST /api/auth_verify.php → exchange token -> session
 - GET /api/session.php → current session
 - GET /api/logout.php → destroy session
-- GET /i18n/:locale.json → localized strings
-- POST /i18n/switch
-- GET /resident/dashboard
-- GET /resident/billing
-- POST /resident/pay (deterministic)
-- GET /resident/request/new
-- POST /resident/request
-- GET /staff/dashboard (activity feed)
-- GET /staff/queue?status=new|in_review|scheduled|done
-- POST /staff/request/:id/status
-- GET /reports/route-summary.csv
-- GET /neighborhoods → list for switcher; POST /neighborhoods/switch
+
+Resident dashboard/billing/activity:
+- GET /api/dashboard.php → next pickup + billing summary for logged‑in user
+- GET /api/recent_activity.php → combined list of latest requests and billing entries
+- GET /api/billing_get.php?id=... → billing item detail (implemented)
+- POST /api/pay_demo.php → deterministic sandbox billing action (planned)
+
+Service requests:
+- POST /api/request_create.php → create a new request (implemented)
+- GET /api/request_get.php?id=... → request detail (implemented)
+- POST /api/request_status_update.php → staff transitions (ack, in_progress, done, cancelled) (implemented)
+- POST /api/request_note_create.php → add note (implemented)
+- GET /api/request_notes.php?request_id=... → list notes (implemented)
+- GET /api/staff_queue.php?status=new|in_review|scheduled|done → staff queue list (planned)
+
+Route summary/export:
+- GET /api/route_summary.csv → CSV export (planned)
+
+i18n:
+- GET /i18n/en.json, /i18n/es.json → localized strings (planned)
+- POST /api/i18n_switch.php → toggle/persist (planned)
 
 ## 5) Directory Structure
-public/index.php, assets/, src/{Controllers,Models,Views,Lib}, config, i18n, data, scripts, tests, docs (see decisions)
+public/index.php (+ index.html, app.js, api/), src/Lib, config, i18n, data, scripts, tests, docs
 
 ## 6) Magic‑link Flow (Offline)
 - Request link: user selects email from seeded users; server generates token (UUID), stores in magic_links with 5‑minute TTL; UI shows token URL (copy)
@@ -63,7 +77,7 @@ public/index.php, assets/, src/{Controllers,Models,Views,Lib}, config, i18n, dat
 - No email provider used; UI conveys sandbox messaging
 
 ## 7) i18n
-- en.json + es.json; key-based lookups, dynamic replacement; toggle persists in session
+- en.json + es.json; key-based lookups, dynamic replacement; toggle persists in session (planned)
 
 ## 8) CSV Export
 - Columns: service_day, neighborhood_name, route_name, pickup_count, area_code, generated_at
@@ -75,10 +89,13 @@ public/index.php, assets/, src/{Controllers,Models,Views,Lib}, config, i18n, dat
 - reset-demo.ps1: guard server running; recreate DB; re-seed
 - export.ps1: GET reports/route-summary.csv and save to exports/
 - test-auth.ps1: end-to-end test for demo auth flow using a persisted WebSession
+ - lint-php.ps1: syntax check all PHP files (added)
+ - test-negative.ps1: asserts staff-only endpoint rejects missing header (added)
 
 ## 10) Tests
-- tests/smoke.ps1: headless flow — request magic link, login, create request, staff sees it, update status, export CSV
-- tests/unit/validator_test.php: input validation, deterministic billing outcomes
+- tests/smoke.ps1: headless flow — request magic link, login, create request, staff sees it, update status, export CSV (planned)
+- tests/unit/validator_test.php: input validation, deterministic billing outcomes (planned)
+- CI web audit: Playwright headless snapshot of desktop/mobile, DOM, a11y, console, network (added)
 
 ## 11) Milestones
 - M1 Scaffold + DB + scripts
@@ -88,6 +105,12 @@ public/index.php, assets/, src/{Controllers,Models,Views,Lib}, config, i18n, dat
 - M5 Staff queue + polling + notes
 - M6 Route summary + CSV
 - M7 i18n + toggle + smoke tests
+
+Alignment status (2025‑09‑27):
+- M1–M4: Implemented via SPA + API endpoints
+- M5: Partially implemented (staff transitions + notes via request detail; queue list page pending)
+- M6: Pending (route summary + CSV)
+- M7: Pending (i18n + smoke/unit tests)
 
 ## 12) Risks
 - Magic‑link UX without email could confuse; mitigate with clear UI copy
