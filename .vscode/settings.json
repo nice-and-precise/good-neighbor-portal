@@ -1,0 +1,13 @@
+{
+  // Keep GitHub Actions linting, but don't warn about unknown/missing secrets locally
+  "github-actions.workflows.enableLinting": true,
+  "github-actions.workflows.validateSecrets": false,
+
+  // Ensure YAML uses the GitHub Actions workflow schema for better diagnostics
+  "yaml.schemas": {
+    "https://json.schemastore.org/github-workflow.json": ".github/workflows/*.{yml,yaml}"
+  },
+
+  // General YAML validation stays on
+  "yaml.validate": true
+}
