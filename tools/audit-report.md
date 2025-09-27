@@ -1,4 +1,4 @@
-# Audit Report - 2025-09-27 17:09:10 -05:00
+# Audit Report - 2025-09-27 17:21:20 -05:00
 
 Executive summary: static 100%, overall 100.
 ## Phase 1: Data Collection
@@ -64,11 +64,11 @@ C:\Users\Owner\Desktop\Damhof_Dumpster\good-neighbor-portal\docs\plan.md
 C:\Users\Owner\Desktop\Damhof_Dumpster\good-neighbor-portal\docs\spec.md
 C:\Users\Owner\Desktop\Damhof_Dumpster\good-neighbor-portal\docs\tasks.md
 C:\Users\Owner\Desktop\Damhof_Dumpster\good-neighbor-portal\docs\troubleshooting.md
-C:\Users\Owner\Desktop\Damhof_Dumpster\good-neighbor-portal\public\api\auth_request.php
-C:\Users\Owner\Desktop\Damhof_Dumpster\good-neighbor-portal\public\api\auth_verify.php
-C:\Users\Owner\Desktop\Damhof_Dumpster\good-neighbor-portal\public\api\billing_get.php
-C:\Users\Owner\Desktop\Damhof_Dumpster\good-neighbor-portal\public\api\csrf.php
-C:\Users\Owner\Desktop\Damhof_Dumpster\good-neighbor-portal\public\api\dashboard.php
+C:\Users\Owner\Desktop\Damhof_Dumpster\good-neighbor-portal\node_modules\.bin\playwright-core.ps1
+C:\Users\Owner\Desktop\Damhof_Dumpster\good-neighbor-portal\node_modules\.bin\playwright.ps1
+C:\Users\Owner\Desktop\Damhof_Dumpster\good-neighbor-portal\node_modules\playwright\README.md
+C:\Users\Owner\Desktop\Damhof_Dumpster\good-neighbor-portal\node_modules\playwright-core\bin\install_media_pack.ps1
+C:\Users\Owner\Desktop\Damhof_Dumpster\good-neighbor-portal\node_modules\playwright-core\bin\reinstall_chrome_beta_win.ps1
 ```
 
 </details>
