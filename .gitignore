@@ -8,6 +8,7 @@ config/app.env
 logs/
 tmp/
 exports/
+artifacts/
 
 # Node or other caches (future-proof)
 node_modules/
