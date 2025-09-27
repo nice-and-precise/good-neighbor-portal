@@ -115,3 +115,19 @@ Milestones tracked in `CHANGELOG.md`:
 - M2: Auth endpoints/UI, runtime fixes, diagnostics, E2E auth test
 - M3: Dashboard API/UI, billing seeding
 - M3.1: Recent Activity API/UI, multi-tenant demo, improved tests
+
+## CI and Releases
+
+- Continuous Integration: GitHub Actions workflow runs end-to-end tests for both tenants on every push and PR to `main`.
+	- Workflow: `.github/workflows/ci.yml`
+	- Required checks (recommended): Protect `main` and require the “PHP E2E” job to pass.
+- Releases: Push a marker file under `.github/release-requests/<tag>` to trigger the Release workflow.
+	- Workflow: `.github/workflows/release.yml`
+	- Notes are pulled from `CHANGELOG.md` (section for the tag label) or `docs/releases/<tag>.md` fallback.
+
+## Contributing
+
+- Use Spec-Driven Development (see `docs/` for spec, plan, and tasks)
+- Feature branches with atomic commits; open PRs to `main`
+- Keep `CHANGELOG.md` updated per milestone
+- PRs should include a brief summary and link to relevant docs sections
