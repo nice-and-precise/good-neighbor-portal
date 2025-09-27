@@ -1,0 +1,69 @@
+name: Copilot PR helper
+
+"on":
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: Branch name to create or update (e.g., copilot/test)
+        required: true
+      title:
+        description: Pull request title
+        required: true
+      body:
+        description: Pull request body/description
+        required: false
+
+jobs:
+  branch_and_pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Configure git identity
+        run: |
+          git config user.name "copilot-automation"
+          git config user.email "copilot-automation@example.com"
+
+      - name: Create or switch branch from default base and add an empty commit
+        run: |
+          set -e
+          BRANCH="${{ github.event.inputs.branch }}"
+          BASE="${{ github.event.repository.default_branch }}"
+          if [ -z "$BASE" ]; then BASE="main"; fi
+          echo "Using branch: $BRANCH"
+          echo "Basing branch on $BASE"
+          git fetch --prune origin "$BASE"
+          git checkout -B "$BRANCH" "origin/$BASE"
+          git commit --allow-empty -m "chore: copilot automated commit"
+
+      - name: Push branch using COPILOT_BOT_TOKEN
+        env:
+          TOKEN: ${{ secrets.COPILOT_BOT_TOKEN }}
+        run: |
+          set -e
+          REPO="${{ github.repository }}"
+          BRANCH="${{ github.event.inputs.branch }}"
+          echo "Pushing to $REPO on branch $BRANCH"
+          git push "https://x-access-token:${TOKEN}@github.com/${REPO}.git" HEAD:"$BRANCH"
+
+      - name: Open pull request
+        env:
+          GH_TOKEN: ${{ secrets.COPILOT_BOT_TOKEN }}
+        run: |
+          set -e
+          BASE="${{ github.event.repository.default_branch }}"
+          if [ -z "$BASE" ]; then BASE="main"; fi
+          echo "Opening PR against base: $BASE"
+          DATA=$(jq -n --arg title "${{ github.event.inputs.title }}" \
+                       --arg head  "${{ github.event.inputs.branch }}" \
+                       --arg base  "$BASE" \
+                       --arg body  "${{ github.event.inputs.body }}" \
+                       '{title: $title, head: $head, base: $base, body: $body}')
+          curl -sS -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            -H "Accept: application/vnd.github+json" \
+            -d "$DATA" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls" | jq '{number, html_url, state, title}'
