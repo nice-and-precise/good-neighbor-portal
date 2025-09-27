@@ -19,8 +19,8 @@ Reference: docs/plan.md, docs/spec.md, docs/decisions.md
 ## M3: Resident Dashboard + Billing Demo
 - SPA dashboard UI: next pickup, billing history (implemented)
 - Endpoint `GET /api/dashboard.php` (implemented)
-- Deterministic pay endpoint; sandbox messaging (planned)
-- FAQs/announcements static section/page (FR-005) (planned)
+- Deterministic pay endpoint; sandbox messaging (implemented)
+- FAQs/announcements static section/page (FR-005) (implemented)
 
 ## M4: Service Requests + Confirmations
 - Endpoints: request_create, request_get (implemented)
@@ -29,18 +29,25 @@ Reference: docs/plan.md, docs/spec.md, docs/decisions.md
 ## M5: Staff Queue + Notes + Polling
 - Staff transitions and notes endpoints (implemented)
 - SPA request detail view shows staff controls and notes with polling (implemented)
-- Staff queue list endpoint/UI (pending)
-- Security: CSRF token on writes (implemented); add sanitized error logging to file (pending)
+- Staff queue list endpoint/UI (implemented)
+- Security: CSRF token on writes (implemented); add sanitized error logging to file (implemented)
 
 ## M6: Route Summary + CSV Export
-- Endpoint: `/api/route_summary.csv` (pending)
+- Endpoint: `/api/route_summary.csv.php` (implemented)
 - CSV columns: service_day, neighborhood_name, route_name, pickup_count, area_code, generated_at
 
 ## M7: i18n + Toggle + Smoke Tests
-- i18n/en.json, i18n/es.json; toggle API and SPA wiring (pending)
-- tests/smoke.ps1: full flow (pending)
-- tests/unit/validator_test.php (pending)
+- i18n/en.json, i18n/es.json; toggle API and SPA wiring (implemented)
+- tests/smoke.ps1: full flow (implemented)
+- tests/unit/validator_test.php (implemented)
 - A11y & Mobile: sweep + checklist; verify responsive (ongoing). CI web audit added (screenshots, DOM, a11y, console, network)
+
+## Next Steps (M8 polish)
+- i18n coverage: replace inline strings in `index.html` with data-i18n attributes and map keys in `en.json`/`es.json`; update `app.js` to apply.
+- Queue UX: add auto-refresh toggle (5s) and loading/empty states; keep status filter.
+- Billing demo: reflect successful pay in dashboard without reload; append a new billing line item client-side.
+- CI: enforce smoke + unit tests (added), keep artifacts from web audit; consider matrix for PHP 8.1/8.2.
+- Error handling: display friendly toast on API errors; keep logs sanitized.
 
 ## Acceptance Checklists
 - Validate FR-001..FR-014 via manual smoke + scripts

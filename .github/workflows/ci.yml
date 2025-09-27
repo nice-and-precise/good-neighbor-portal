@@ -31,6 +31,10 @@ jobs:
           sleep 2
           curl -sf http://127.0.0.1:8080/api/csrf.php > /dev/null
 
+      - name: Negative test - staff endpoint requires header
+        shell: pwsh
+        run: .\.specify\scripts\powershell\test-negative.ps1 -Base http://127.0.0.1:8080
+
       - name: E2E - Willmar tenant
         shell: pwsh
         run: .\.specify\scripts\powershell\test-auth.ps1 -Email ci@example.com -Tenant willmar-mn -Base http://127.0.0.1:8080
@@ -38,3 +42,11 @@ jobs:
       - name: E2E - Kandiyohi tenant
         shell: pwsh
         run: .\.specify\scripts\powershell\test-auth.ps1 -Email ci2@example.com -Tenant kandiyohi-mn -Base http://127.0.0.1:8080
+
+      - name: Smoke test - full flow
+        shell: pwsh
+        run: .\tests\smoke.ps1 -BaseUrl http://127.0.0.1:8080 -Email ci@example.com -Tenant willmar-mn
+
+      - name: Unit tests - Validator
+        shell: bash
+        run: php tests/unit/validator_test.php

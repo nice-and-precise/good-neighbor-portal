@@ -51,7 +51,7 @@ Resident dashboard/billing/activity:
 - GET /api/dashboard.php → next pickup + billing summary for logged‑in user
 - GET /api/recent_activity.php → combined list of latest requests and billing entries
 - GET /api/billing_get.php?id=... → billing item detail (implemented)
-- POST /api/pay_demo.php → deterministic sandbox billing action (planned)
+- POST /api/pay_demo.php → deterministic sandbox billing action (implemented)
 
 Service requests:
 - POST /api/request_create.php → create a new request (implemented)
@@ -59,14 +59,14 @@ Service requests:
 - POST /api/request_status_update.php → staff transitions (ack, in_progress, done, cancelled) (implemented)
 - POST /api/request_note_create.php → add note (implemented)
 - GET /api/request_notes.php?request_id=... → list notes (implemented)
-- GET /api/staff_queue.php?status=new|in_review|scheduled|done → staff queue list (planned)
+- GET /api/staff_queue.php?status=new|ack|assigned|in_progress|done|cancelled → staff queue list (implemented)
 
 Route summary/export:
-- GET /api/route_summary.csv → CSV export (planned)
+- GET /api/route_summary.csv.php → CSV export (implemented)
 
 i18n:
-- GET /i18n/en.json, /i18n/es.json → localized strings (planned)
-- POST /api/i18n_switch.php → toggle/persist (planned)
+- GET /i18n/en.json, /i18n/es.json → localized strings (implemented)
+- POST /api/i18n_switch.php → toggle/persist (implemented)
 
 ## 5) Directory Structure
 public/index.php (+ index.html, app.js, api/), src/Lib, config, i18n, data, scripts, tests, docs
@@ -77,7 +77,7 @@ public/index.php (+ index.html, app.js, api/), src/Lib, config, i18n, data, scri
 - No email provider used; UI conveys sandbox messaging
 
 ## 7) i18n
-- en.json + es.json; key-based lookups, dynamic replacement; toggle persists in session (planned)
+- en.json + es.json; key-based lookups, dynamic replacement; toggle persists in session (implemented)
 
 ## 8) CSV Export
 - Columns: service_day, neighborhood_name, route_name, pickup_count, area_code, generated_at
@@ -93,8 +93,8 @@ public/index.php (+ index.html, app.js, api/), src/Lib, config, i18n, data, scri
  - test-negative.ps1: asserts staff-only endpoint rejects missing header (added)
 
 ## 10) Tests
-- tests/smoke.ps1: headless flow — request magic link, login, create request, staff sees it, update status, export CSV (planned)
-- tests/unit/validator_test.php: input validation, deterministic billing outcomes (planned)
+- tests/smoke.ps1: headless flow — request magic link, login, create request, staff sees it, update status, export CSV (implemented)
+- tests/unit/validator_test.php: input validation, deterministic billing outcomes (implemented)
 - CI web audit: Playwright headless snapshot of desktop/mobile, DOM, a11y, console, network (added)
 
 ## 11) Milestones
@@ -108,9 +108,9 @@ public/index.php (+ index.html, app.js, api/), src/Lib, config, i18n, data, scri
 
 Alignment status (2025‑09‑27):
 - M1–M4: Implemented via SPA + API endpoints
-- M5: Partially implemented (staff transitions + notes via request detail; queue list page pending)
-- M6: Pending (route summary + CSV)
-- M7: Pending (i18n + smoke/unit tests)
+- M5: Implemented (staff transitions + notes + queue list)
+- M6: Implemented (route summary + CSV export)
+- M7: Implemented (i18n + toggle + smoke/unit tests)
 
 ## 12) Risks
 - Magic‑link UX without email could confuse; mitigate with clear UI copy
