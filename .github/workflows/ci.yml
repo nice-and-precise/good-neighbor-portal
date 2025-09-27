@@ -18,7 +18,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.1'
-          extensions: pdo, pdo_sqlite, sqlite3, mysqlnd, redis, ds, opcache
+          extensions: pdo_sqlite, sqlite3, redis, ds, opcache
           coverage: none
 
       - name: Migrate and seed database
