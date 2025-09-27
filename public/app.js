@@ -42,6 +42,7 @@
     if (res.ok) {
       state.loggedIn = true;
       $('#authed').style.display = '';
+      await loadDashboard();
     }
   });
 
@@ -55,5 +56,15 @@
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
+  }
+
+  async function loadDashboard() {
+    try {
+      const d = await getJSON('/api/dashboard.php');
+      if (!d.ok) { $('#dashboard').textContent = 'Dashboard unavailable.'; return; }
+      const money = (c) => `$${(c/100).toFixed(2)}`;
+      const bills = d.billing.map(b => `- ${b.created_at}: ${b.description} (${money(b.amount_cents)})`).join('\n');
+      $('#dashboard').textContent = `Next pickup: ${d.next_pickup_date}\nBilling:\n${bills || 'No charges'}`;
+    } catch { $('#dashboard').textContent = 'Dashboard error.'; }
   }
 })();
