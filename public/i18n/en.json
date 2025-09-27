@@ -67,4 +67,18 @@
   "activityUnavailable": "Activity unavailable.",
   "activityEmpty": "Nothing yet",
   "activityError": "Activity error."
+  "scaffoldReady": "Scaffold ready. Use the scripts to setup and run the app.",
+  "faq1": "Bulk pickups run Mon–Fri. Schedule 24h in advance.",
+  "faq2": "Containers: 35/65/95 gallon sizes available.",
+  "faq3": "Holiday routes post on the front page each season.",
+  "demoOnly": "DEMO ONLY",
+  "initFailed": "Init failed. Check server.",
+  "tokenIssued": "Token issued (demo: shown below).",
+  "error": "error",
+  "loading": "Loading…",
+  "queueError": "Queue error",
+  "queueLoadFailed": "Queue load failed",
+  "languageSet": "Language set",
+  "langToggleFailed": "Lang toggle failed",
+  "loggedOut": "Logged out."
 }

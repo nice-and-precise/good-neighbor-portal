@@ -18,3 +18,6 @@ Assumptions: “Willmar, MN” used in demo data (addresses/areas); no external 
 Repository & Release Management:
 - Repository visibility: Private by default; collaborators added explicitly as needed
 - CHANGELOG: Maintain `CHANGELOG.md` with milestone summaries (M1, M2, ...)
+
+Tooling & Cross-platform (update):
+- Added Bash parity scripts under `.specify/scripts/bash` for setup, run, reset, export, and lint to match PowerShell equivalents, maintaining Windows-first ergonomics while enabling Linux/macOS contributors and CI parity.

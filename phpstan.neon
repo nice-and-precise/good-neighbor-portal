@@ -1,0 +1,9 @@
+parameters:
+  level: 0
+  paths:
+    - src
+    - public/api
+  checkMissingIterableValueType: false
+  checkGenericClassInNonGenericObjectType: false
+  checkImplicitMixed: false
+  reportUnmatchedIgnoredErrors: true

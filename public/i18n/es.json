@@ -67,4 +67,18 @@
   "activityUnavailable": "Actividad no disponible.",
   "activityEmpty": "Aún nada",
   "activityError": "Error de actividad."
+  "scaffoldReady": "Andamiaje listo. Use los scripts para configurar y ejecutar la aplicación.",
+  "faq1": "Las recolecciones a granel son de lunes a viernes. Prográmelas con 24 horas de anticipación.",
+  "faq2": "Contenedores: tamaños de 35/65/95 galones disponibles.",
+  "faq3": "Las rutas de días festivos se publican en la página principal cada temporada.",
+  "demoOnly": "SOLO DEMO",
+  "initFailed": "La inicialización falló. Verifique el servidor.",
+  "tokenIssued": "Token emitido (demostración: se muestra abajo).",
+  "error": "error",
+  "loading": "Cargando…",
+  "queueError": "Error de cola",
+  "queueLoadFailed": "Error al cargar la cola",
+  "languageSet": "Idioma establecido",
+  "langToggleFailed": "Error al cambiar el idioma",
+  "loggedOut": "Sesión cerrada."
 }

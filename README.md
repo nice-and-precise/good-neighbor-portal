@@ -47,14 +47,22 @@ specify check
 # First-time setup: create config, migrate DB, seed demo data
 .\.specify\scripts\powershell\setup.ps1
 
+# macOS/Linux: ./ .specify/scripts/bash/setup.sh
+
 # Start local server on http://127.0.0.1:8080
 .\.specify\scripts\powershell\run.ps1 -Port 8080
+
+# macOS/Linux: ./ .specify/scripts/bash/run.sh
 
 # If you need to reset the demo database (guarded if server is running)
 .\.specify\scripts\powershell\reset-demo.ps1
 
+# macOS/Linux: ./ .specify/scripts/bash/reset-demo.sh
+
 # Export placeholder CSV (will be replaced in later milestone)
 .\.specify\scripts\powershell\export.ps1 -Out .\exports\route-summary.csv
+
+# macOS/Linux: ./ .specify/scripts/bash/export.sh ./exports/route-summary.csv
 
 # Optional: E2E test of the demo auth flow (magic-link style)
 .\.specify\scripts\powershell\test-auth.ps1 -Email resident@example.com
@@ -158,6 +166,7 @@ Milestones tracked in `CHANGELOG.md`:
 - Continuous Integration: GitHub Actions workflow runs end-to-end tests for both tenants on every push and PR to `main`.
 	- Workflow: `.github/workflows/ci.yml`
 	- Includes a PHP syntax lint gate (`php -l` over all PHP files) to catch syntax errors early.
+	- Runs PHPStan static analysis (level 0 baseline) as a separate job.
 	- Required checks (recommended): Protect `main` and require the “PHP E2E” job to pass. Use the "Apply Branch Protection" workflow to pin checks.
 - Releases: Push a marker file under `.github/release-requests/<tag>` to trigger the Release workflow.
 	- Workflow: `.github/workflows/release.yml`
@@ -177,3 +186,12 @@ See `docs/endpoints.md` for a consolidated list of API endpoints and headers.
 Additional docs:
 - `docs/development-workflow.md` – step-by-step development and review flow
 - `docs/troubleshooting.md` – common issues and fixes
+
+### Static analysis locally
+
+Install dependencies and run PHPStan:
+
+```powershell
+composer install
+./vendor/bin/phpstan analyse --configuration=phpstan.neon
+```
