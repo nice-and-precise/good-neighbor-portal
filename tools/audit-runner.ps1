@@ -362,12 +362,25 @@ if ($DraftIssue) {
     $api = "https://api.github.com"
     $headers = @{ Authorization = "token $token"; 'User-Agent' = 'audit-runner'; Accept = 'application/vnd.github+json' }
     $runUrl = $null
+    $artifactUrl = $null
     if ($env:GITHUB_SERVER_URL -and $env:GITHUB_REPOSITORY -and $env:GITHUB_RUN_ID) {
       $runUrl = "$($env:GITHUB_SERVER_URL)/$($env:GITHUB_REPOSITORY)/actions/runs/$($env:GITHUB_RUN_ID)"
+      # Try to find artifact named 'audit-report'
+      try {
+        $arts = Invoke-RestMethod -Headers $headers -Method GET -Uri "$api/repos/$owner/$repo/actions/runs/$($env:GITHUB_RUN_ID)/artifacts" -ErrorAction Stop
+        if ($arts -and $arts.total_count -gt 0) {
+          $art = ($arts.artifacts | Where-Object { $_.name -eq 'audit-report' } | Select-Object -First 1)
+          if ($art) { $artifactUrl = $art.archive_download_url }
+        }
+      } catch { }
     }
     $title = "[Automated] Repository Audit Report"
     $reportBody = Get-Content -Raw -Path $reportPath
-    $body = "${summaryLine}`n`nReport generated: $ts`n`n" + (if ($runUrl) { "Workflow run: $runUrl`n`n" } else { "" }) + "<details><summary>Full report</summary>\n\n```markdown\n${reportBody}\n```\n\n</details>"
+  $links = @()
+  if ($runUrl) { $links += "Workflow run: $runUrl" }
+  if ($artifactUrl) { $links += "Artifact (zip): $artifactUrl" }
+  $linkBlock = if ($links.Count -gt 0) { ($links -join "`n") + "`n`n" } else { "" }
+  $body = "${summaryLine}`n`nReport generated: $ts`n`n$linkBlock" + "<details><summary>Full report</summary>\n\n```markdown\n${reportBody}\n```\n\n</details>"
 
   # Search open issues with this title
   $searchQuery = "repo:$repoFull in:title `"$title`" is:issue is:open"
