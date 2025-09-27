@@ -1,0 +1,72 @@
+name: Web Audit (Headless Chrome)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: Run web audit and upload artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: sqlite, pdo_sqlite
+
+      - name: Start PHP built-in server
+        run: |
+          php -S 127.0.0.1:8080 -t public >/dev/null 2>&1 &
+          echo $! > php_server.pid
+        shell: bash
+
+      - name: Wait for server to be ready
+        run: |
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:8080/ >/dev/null; then
+              echo "Server is up"; exit 0; fi; sleep 1; done
+          echo "Server did not start in time" >&2; exit 1
+        shell: bash
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Playwright Chromium
+        run: |
+          npm init -y >/dev/null 2>&1 || true
+          npm install --no-audit --no-fund --omit=dev playwright@^1.47.0
+          npx -y playwright install --with-deps chromium
+        shell: bash
+
+      - name: Run web audit script
+        run: |
+          node tools/web-audit.mjs
+        env:
+          TARGET_URL: http://127.0.0.1:8080/
+        shell: bash
+
+      - name: Upload web audit artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: web-audit-artifacts
+          path: |
+            artifacts/web-audit/**
+          if-no-files-found: warn
+
+      - name: Stop PHP server
+        if: always()
+        run: |
+          if [ -f php_server.pid ]; then kill "$(cat php_server.pid)" || true; fi
+        shell: bash

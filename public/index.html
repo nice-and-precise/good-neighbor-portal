@@ -19,25 +19,25 @@
   </style>
 </head>
 <body>
-  <h1>Good Neighbor Portal</h1>
+  <h1 data-i18n="title">Good Neighbor Portal</h1>
   <p class="note">Scaffold ready. Use the PowerShell scripts to setup and run the app.</p>
   <section>
-    <h2>Demo Login</h2>
-    <label>Tenant
+    <h2 data-i18n="demoLogin">Demo Login</h2>
+    <label><span data-i18n="tenantLabel">Tenant</span>
       <select id="tenant"></select>
     </label>
-    <label>Email
+    <label><span data-i18n="emailLabel">Email</span>
       <input id="email" type="email" placeholder="you@example.com" />
     </label>
-    <button id="request">Request magic link (demo shows token)</button>
-    <label>Token
+    <button id="request" data-i18n="requestMagicLink">Request magic link (demo shows token)</button>
+    <label><span data-i18n="tokenLabel">Token</span>
       <input id="token" type="text" />
     </label>
-    <button id="verify">Verify token</button>
+    <button id="verify" data-i18n="verifyToken">Verify token</button>
     <div id="status" class="note" style="margin-top:.5rem"></div>
     <div id="authed" class="note">
-  Logged in. <button id="logout">Logout</button>
-  <h2 id="dashboard-anchor" style="margin: .75rem 0 0">Your Resident Portal</h2>
+  <span data-i18n="loggedIn">Logged in.</span> <button id="logout" data-i18n="logout">Logout</button>
+  <h2 id="dashboard-anchor" style="margin: .75rem 0 0" data-i18n="residentPortal">Your Resident Portal</h2>
   <div id="tenant-badge" class="badge" style="margin:.25rem 0 0">You're viewing: —</div>
       <div class="row" style="margin-top:.5rem">
         <div class="col">
@@ -48,30 +48,86 @@
         </div>
         <div class="col">
           <div class="card">
-            <h3 style="margin-top:0">Service Request</h3>
-            <label>Category
+            <h3 style="margin-top:0" data-i18n="serviceRequest">Service Request</h3>
+            <label><span data-i18n="categoryLabel">Category</span>
               <select id="req-category">
                 <option value="bulk_pickup">Bulk pickup</option>
                 <option value="container_swap">Container swap</option>
                 <option value="issue_report">Issue report</option>
               </select>
             </label>
-            <label>Description
+            <label><span data-i18n="descriptionLabel">Description</span>
               <textarea id="req-desc" rows="3" style="width:100%"></textarea>
             </label>
-            <button id="req-submit">Submit Request</button>
+            <button id="req-submit" data-i18n="submitRequest">Submit Request</button>
             <div id="req-status" class="muted" style="margin-top:.5rem"></div>
           </div>
         </div>
       </div>
       <div class="row" style="margin-top:.5rem">
         <div class="col">
+          <div id="faqs" class="card">
+            <h3 style="margin-top:0" data-i18n="faqs">FAQs & Announcements</h3>
+            <ul style="margin:.25rem 0 0 1rem">
+              <li>Bulk pickups run Mon–Fri. Schedule 24h in advance.</li>
+              <li>Containers: 35/65/95 gallon sizes available.</li>
+              <li>Holiday routes post on the front page each season.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="col">
+          <div id="billing-actions" class="card">
+            <h3 style="margin-top:0" data-i18n="billingActions">Billing Actions (Demo)</h3>
+            <label><span data-i18n="amountCents">Amount (cents)</span>
+              <input id="pay-amount" type="number" min="100" step="1" value="2500" />
+            </label>
+            <label><span data-i18n="methodLabel">Method</span>
+              <select id="pay-method"><option value="card">Card</option><option value="ach">ACH</option></select>
+            </label>
+            <button id="pay-now" data-i18n="payNowDemo">Pay now (demo)</button>
+            <div id="pay-status" class="muted" style="margin-top:.5rem"></div>
+          </div>
+        </div>
+        <div class="col">
+          <div id="staff-queue" class="card">
+            <h3 style="margin-top:0" data-i18n="staffQueue">Staff Queue (Demo)</h3>
+            <label><span data-i18n="staffHeaderKey">Staff header key</span> <input id="queue-staff-key" type="text" placeholder="demo-staff" /></label>
+            <label><span data-i18n="statusLabel">Status</span>
+              <select id="queue-status">
+                <option value="new">New</option>
+                <option value="ack">Acknowledged</option>
+                <option value="in_progress">In progress</option>
+                <option value="done">Done</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </label>
+            <label><input id="queue-auto" type="checkbox" /> <span data-i18n="autoRefresh">Auto-refresh</span></label>
+            <button id="queue-load" data-i18n="loadQueue">Load queue</button>
+            <div id="queue-list" class="muted" style="margin-top:.5rem"></div>
+          </div>
+        </div>
+      </div>
+      <div class="row" style="margin-top:.5rem">
+        <div class="col">
+          <div id="i18n" class="card">
+            <h3 style="margin-top:0" data-i18n="language">Language</h3>
+            <button data-lang="en">English</button>
+            <button data-lang="es">Español</button>
+            <div id="i18n-status" class="muted" style="margin-top:.25rem"></div>
+          </div>
+        </div>
+        <div class="col"></div>
+        <div class="col"></div>
+      </div>
+      <div class="row" style="margin-top:.5rem">
+        <div class="col">
           <div id="detail" class="card" style="display:none"></div>
         </div>
       </div>
-      <div class="muted" style="margin-top:.25rem">Demo data only · M3/M4</div>
+      <div class="muted" style="margin-top:.25rem" data-i18n="demoFooter">Demo data only · M3/M4</div>
     </div>
   </section>
+  <div id="toast" role="status" aria-live="polite" style="position:fixed;right:1rem;bottom:1rem;background:#333;color:#fff;padding:.5rem .75rem;border-radius:.4rem;box-shadow:0 2px 8px rgba(0,0,0,.2);opacity:0;transition:opacity .2s;max-width:60ch"></div>
   <script src="/app.js"></script>
 </body>
 </html>

@@ -1,0 +1,54 @@
+name: Auto Open PR for CI branches
+
+on:
+  push:
+    branches:
+      - 'ci/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  open-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine base branch
+        id: meta
+        run: |
+          BASE="${{ github.event.repository.default_branch }}"
+          if [ -z "$BASE" ]; then BASE="main"; fi
+          echo "base=$BASE" >> "$GITHUB_OUTPUT"
+
+      - name: Check if PR already exists
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          HEAD="${{ github.ref_name }}"
+          BASE="${{ steps.meta.outputs.base }}"
+          echo "HEAD=$HEAD BASE=$BASE"
+          EXISTING=$(curl -sS -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls?state=open&head=${{ github.repository_owner }}:$HEAD&base=$BASE" | jq '.[0] | .number // 0')
+          echo "existing_pr=$EXISTING" >> "$GITHUB_OUTPUT"
+
+      - name: Open PR
+        if: steps.check.outputs.existing_pr == '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          HEAD="${{ github.ref_name }}"
+          BASE="${{ steps.meta.outputs.base }}"
+          TITLE="chore(ci): add web audit workflow"
+          BODY=$(jq -n \
+            --arg title "$TITLE" \
+            --arg body "Automated web audit workflow and Playwright-based script. Captures desktop/mobile screenshots, DOM snapshot, a11y tree, console and network logs. Artifacts uploaded on each push/PR." \
+            '{title: $title, body: $body, head: "'"$HEAD"'", base: "'"$BASE"'"}')
+          curl -sS -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            -H "Accept: application/vnd.github+json" \
+            -d "$BODY" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls" | jq '{number, html_url, state, title}'

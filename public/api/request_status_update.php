@@ -30,12 +30,22 @@ $db = new Db($config);
 $pdo = $db->pdo();
 
 // Ensure request belongs to tenant
-$exist = $pdo->prepare('SELECT id FROM service_requests WHERE id = ? AND tenant_id = ? LIMIT 1');
-$exist->execute([$id, $tid]);
-if (!$exist->fetchColumn()) { Util::json(['ok'=>false,'error'=>'not_found'],404); exit; }
+try {
+	$exist = $pdo->prepare('SELECT id FROM service_requests WHERE id = ? AND tenant_id = ? LIMIT 1');
+	$exist->execute([$id, $tid]);
+	if (!$exist->fetchColumn()) { Util::json(['ok'=>false,'error'=>'not_found'],404); exit; }
+} catch (\Throwable $e) {
+	Util::logError('status_update_lookup_failed', ['id'=>$id, 'tenant'=>$tid, 'ex'=>$e->getMessage()]);
+	Util::json(['ok'=>false,'error'=>'server_error'],500); exit;
+}
 
 $now = (new DateTimeImmutable('now'))->format('Y-m-d H:i:s');
-$upd = $pdo->prepare('UPDATE service_requests SET status = ?, updated_at = ? WHERE id = ?');
-$upd->execute([$action, $now, $id]);
+try {
+	$upd = $pdo->prepare('UPDATE service_requests SET status = ?, updated_at = ? WHERE id = ?');
+	$upd->execute([$action, $now, $id]);
+} catch (\Throwable $e) {
+	Util::logError('status_update_failed', ['id'=>$id, 'action'=>$action, 'tenant'=>$tid, 'ex'=>$e->getMessage()]);
+	Util::json(['ok'=>false,'error'=>'server_error'],500); exit;
+}
 
 Util::json(['ok'=>true,'id'=>$id,'status'=>$action,'updated_at'=>$now]);

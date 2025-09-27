@@ -8,6 +8,7 @@ config/app.env
 logs/
 tmp/
 exports/
+artifacts/
 
 # Node or other caches (future-proof)
 node_modules/
@@ -17,3 +18,5 @@ node_modules/
 Thumbs.db
 .vscode/*
 !.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/extensions.json
