@@ -3,7 +3,6 @@ parameters:
   paths:
     - src
     - public/api
-  memoryLimit: 512M
   checkMissingIterableValueType: false
   checkGenericClassInNonGenericObjectType: false
   checkImplicitMixed: false

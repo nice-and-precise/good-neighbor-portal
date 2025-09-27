@@ -81,8 +81,8 @@ jobs:
       - name: Install Composer dependencies
         run: |
           composer self-update || true
-          composer install --no-interaction --no-progress
+          composer install --no-interaction --no-progress --memory-limit=-1
 
       - name: Run PHPStan (level 0)
         run: |
-          ./vendor/bin/phpstan analyse --no-progress --configuration=phpstan.neon
+          php -d memory_limit=1G ./vendor/bin/phpstan analyse --no-progress --configuration=phpstan.neon
