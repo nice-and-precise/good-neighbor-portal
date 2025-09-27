@@ -257,8 +257,13 @@
     const method = document.getElementById('pay-method').value || 'card';
     const res = await postJSON('/api/pay_demo.php', { amount_cents: amt, method });
     const el = document.getElementById('pay-status');
-    if (res && res.ok) el.textContent = `Paid ${res.amount_cents}c via ${res.method} (demo).`;
-    else el.textContent = (res && res.message) || 'Payment failed (demo).';
+    if (res && res.ok) {
+      el.textContent = `Paid ${res.amount_cents}c via ${res.method} (demo).`;
+      // Refresh dashboard/activity so the new billing line appears immediately
+      try { await Promise.all([loadDashboard(), loadActivity()]); } catch {}
+    } else {
+      el.textContent = (res && res.message) || 'Payment failed (demo).';
+    }
   });
 
   // Staff queue
