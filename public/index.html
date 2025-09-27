@@ -9,15 +9,36 @@
     .skip-link { position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden; }
     .skip-link:focus { position:static; width:auto; height:auto; padding:.5rem; background:#004085; color:#fff; border-radius:.25rem; display:inline-block; margin-bottom:.5rem; }
     .note { background:#eef; padding:.5rem; border-radius:.25rem; }
-    .card { background:#fff; border:1px solid #ddd; border-radius:.5rem; padding:1rem; box-shadow:0 1px 2px rgba(0,0,0,.05); }
-    .muted { color:#555; }
-    .badge { display:inline-block; background:#f0f7ff; color:#004085; border:1px solid #b8daff; border-radius:999px; padding:.2rem .6rem; font-size:.9rem; }
+    .card { background:#fff; border:1px solid #d0d0d0; border-radius:.5rem; padding:1rem; box-shadow:0 1px 2px rgba(0,0,0,.05); }
+    .muted { color:#444; }
+    .badge { display:inline-block; background:#e6f0ff; color:#003366; border:1px solid #8cb3ff; border-radius:999px; padding:.25rem .65rem; font-size:.9rem; }
     label { display:block; margin-top: .5rem; }
-    input, select { padding:.4rem; }
-    button { margin-top:.5rem; }
+    input, select {
+      padding:.6rem .7rem; /* >=44px tap target height when combined with line-height/margins */
+      line-height:1.3;
+      border:1px solid #777;
+      border-radius:.3rem;
+    }
+    input:focus, select:focus, textarea:focus, button:focus {
+      outline:3px solid #1a73e8;
+      outline-offset:2px;
+      box-shadow:0 0 0 2px rgba(26,115,232,.2);
+    }
+    button {
+      margin-top:.5rem;
+      padding:.6rem .9rem; /* improve tap targets */
+      border:1px solid #2256a3;
+      background:#2b66c0;
+      color:#fff;
+      border-radius:.35rem;
+    }
+    button:hover { background:#255aa9; }
+    button:active { background:#1f4d92; }
     #authed { display:none; margin-top:1rem; }
     .row { display:flex; gap:1rem; flex-wrap:wrap; }
-    .col { flex: 1 1 320px; }
+    .col { flex: 1 1 320px; min-width:280px; }
+    /* Avoid horizontal scroll on small screens */
+    html, body { max-width:100%; overflow-x:hidden; }
   </style>
 </head>
 <body>
@@ -35,8 +56,9 @@
     </label>
     <button id="request" type="button" data-i18n="requestMagicLink">Request magic link (demo shows token)</button>
     <label><span data-i18n="tokenLabel">Token</span>
-      <input id="token" type="text" />
+      <input id="token" type="text" aria-describedby="token-help" />
     </label>
+    <div id="token-help" class="muted">For the demo, the token is returned after requesting a magic link.</div>
     <button id="verify" type="button" data-i18n="verifyToken">Verify token</button>
     <div id="status" class="note" role="status" aria-live="polite" style="margin-top:.5rem"></div>
     <div id="authed" class="note">

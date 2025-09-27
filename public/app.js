@@ -232,7 +232,11 @@
         $('#tenant-badge').textContent = `You're viewing: ${found ? found.name : active}`;
       } catch {}
       const anchor = document.getElementById('dashboard-anchor');
-      if (anchor) { anchor.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+      if (anchor) {
+        anchor.setAttribute('tabindex','-1');
+        anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        anchor.focus({ preventScroll: true });
+      }
       // Attempt to load detail route if present
       route();
     }
