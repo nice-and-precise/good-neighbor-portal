@@ -190,7 +190,7 @@ pwsh -File .specify/scripts/powershell/export.ps1 -Out ./exports/route-summary.c
 - **Principle 6**: Zero-cloud development (offline after setup)
 
 ### Common Validation Issues & Solutions
-- **PowerShell extension errors**: Use manual PHP commands instead of setup.ps1
+- **PowerShell PHP extension errors**: Use manual PHP commands instead of setup.ps1
 - **Port conflicts**: Server checks port 8080; use a different port or identify the process using `lsof -i :8080` (or `netstat -anp | grep 8080`), then kill the specific PID with `kill <pid>`.
 - **Database locks**: Stop server before running reset scripts
 - **Missing database**: Run manual setup sequence above
