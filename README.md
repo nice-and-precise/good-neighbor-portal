@@ -195,3 +195,27 @@ Install dependencies and run PHPStan:
 composer install
 ./vendor/bin/phpstan analyse --configuration=phpstan.neon
 ```
+
+## Development Workflow
+
+### Quick Commits (Primary)
+```bash
+git add . && git commit -m "feat(scope): description" && git push
+```
+
+### Feature Branches (Major Changes)
+```bash
+git checkout -b feature/name
+# develop...
+gh pr create --title "feat(scope): description"
+```
+
+### VS Code Tasks
+- Terminal → Run Task... → "App: Run server (8080)"
+- Terminal → Run Task... → "Tests: Smoke"
+- F1 → "Git: Commit Staged" for quick commits
+
+### Quality Checks
+- `./tools/audit-runner.ps1` - comprehensive audit
+- `./vendor/bin/phpstan analyse` - static analysis
+- `./.specify/scripts/powershell/test-auth.ps1` - E2E auth test

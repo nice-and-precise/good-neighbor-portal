@@ -30,4 +30,28 @@
     "https://json.schemastore.org/github-workflow.json": ".github/workflows/*.{yml,yaml}"
   },
   "yaml.validate": true
+  ,
+  "git.suggestSmartCommit": false,
+  "git.autofetch": true,
+  "git.confirmSync": false,
+  "git.enableSmartCommit": true,
+  "git.postCommitCommand": "push",
+  "conventionalCommits.scopes": [
+    "auth",
+    "billing",
+    "dashboard",
+    "api",
+    "ui",
+    "db",
+    "docs",
+    "ci",
+    "config",
+    "audit",
+    "i18n",
+    "staff",
+    "tenant",
+    "export",
+    "test"
+  ],
+  "conventionalCommits.showEditor": true
 }
