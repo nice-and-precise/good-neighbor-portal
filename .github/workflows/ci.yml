@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  php-e2e:
+    name: PHP E2E
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.1 with SQLite
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: pdo_sqlite, sqlite3
+          coverage: none
+
+      - name: Migrate and seed database
+        shell: pwsh
+        run: .\.specify\scripts\powershell\setup.ps1 -Force
+
+      - name: Start PHP dev server
+        shell: bash
+        run: |
+          php -d extension=pdo_sqlite -d extension=sqlite3 -S 127.0.0.1:8080 -t public >/dev/null 2>&1 &
+          sleep 2
+          curl -sf http://127.0.0.1:8080/api/csrf.php > /dev/null
+
+      - name: E2E - Willmar tenant
+        shell: pwsh
+        run: .\.specify\scripts\powershell\test-auth.ps1 -Email ci@example.com -Tenant willmar-mn -Base http://127.0.0.1:8080
+
+      - name: E2E - Kandiyohi tenant
+        shell: pwsh
+        run: .\.specify\scripts\powershell\test-auth.ps1 -Email ci2@example.com -Tenant kandiyohi-mn -Base http://127.0.0.1:8080
