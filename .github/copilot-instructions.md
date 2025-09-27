@@ -146,7 +146,7 @@ pwsh -File .specify/scripts/powershell/export.ps1 -Out ./exports/route-summary.c
 
 ### Complete Directory Structure
 ```
-/home/runner/work/good-neighbor-portal/good-neighbor-portal/
+./
 ├── .github/
 │   ├── copilot-instructions.md   # This file
 │   └── prompts/                  # Copilot slash commands (7 files)
