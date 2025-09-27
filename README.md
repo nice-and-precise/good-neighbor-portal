@@ -157,6 +157,7 @@ Milestones tracked in `CHANGELOG.md`:
 
 - Continuous Integration: GitHub Actions workflow runs end-to-end tests for both tenants on every push and PR to `main`.
 	- Workflow: `.github/workflows/ci.yml`
+	- Includes a PHP syntax lint gate (`php -l` over all PHP files) to catch syntax errors early.
 	- Required checks (recommended): Protect `main` and require the “PHP E2E” job to pass. Use the "Apply Branch Protection" workflow to pin checks.
 - Releases: Push a marker file under `.github/release-requests/<tag>` to trigger the Release workflow.
 	- Workflow: `.github/workflows/release.yml`
@@ -172,3 +173,7 @@ See `docs/endpoints.md` for a consolidated list of API endpoints and headers.
 - Feature branches with atomic commits; open PRs to `main`
 - Keep `CHANGELOG.md` updated per milestone
 - PRs should include a brief summary and link to relevant docs sections
+
+Additional docs:
+- `docs/development-workflow.md` – step-by-step development and review flow
+- `docs/troubleshooting.md` – common issues and fixes

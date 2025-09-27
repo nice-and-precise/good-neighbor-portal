@@ -51,6 +51,11 @@ jobs:
         shell: pwsh
         run: .\tests\smoke.ps1 -BaseUrl http://127.0.0.1:8080 -Email ci@example.com -Tenant willmar-mn
 
+      - name: Lint - PHP syntax check (php -l)
+        shell: bash
+        run: |
+          find . -type f -name "*.php" -not -path "./vendor/*" -print0 | xargs -0 -n1 php -l
+
       - name: Unit test - pay demo deterministic behavior
         shell: pwsh
         run: .\tests\pay-deterministic.ps1 -BaseUrl http://127.0.0.1:8080 -Email ci@example.com -Tenant willmar-mn
