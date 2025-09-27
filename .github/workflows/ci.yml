@@ -63,3 +63,26 @@ jobs:
       - name: Unit tests - Validator
         shell: bash
         run: php tests/unit/validator_test.php
+
+  phpstan:
+    name: PHPStan Static Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo_sqlite, sqlite3
+          coverage: none
+
+      - name: Install Composer dependencies
+        run: |
+          composer self-update || true
+          composer install --no-interaction --no-progress
+
+      - name: Run PHPStan (level 0)
+        run: |
+          ./vendor/bin/phpstan analyse --no-progress --configuration=phpstan.neon

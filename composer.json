@@ -1,0 +1,17 @@
+{
+  "name": "jdamhofbbw/good-neighbor-portal",
+  "description": "Good Neighbor Portal demo (Spec Kit)",
+  "type": "project",
+  "license": "MIT",
+  "require": {
+    "php": ">=8.1"
+  },
+  "require-dev": {
+    "phpstan/phpstan": "^1.11"
+  },
+  "autoload": {
+    "psr-4": {
+      "GNP\\": "src/"
+    }
+  }
+}

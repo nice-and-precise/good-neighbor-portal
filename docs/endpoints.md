@@ -21,8 +21,8 @@ Service Requests
 Billing
 - GET /api/billing_get.php?id=ID → Returns detailed information about a billing charge (scoped to resident & tenant).
 
-Staff Demo Endpoints
-These require a valid session and the demo staff header `X-Staff-Key` matching `STAFF_DEMO_KEY` in config.
+Staff Demo Endpoints (DEMO ONLY)
+These are demo-only surfaces. They require a valid session and the demo staff header `X-Staff-Key` matching `STAFF_DEMO_KEY` in config.
 - POST /api/request_status_update.php { id, action } → Transitions a request status. Allowed actions: ack, in_progress, done, cancelled.
 - POST /api/request_note_create.php { request_id, note } → Adds a staff note to a request.
 - GET /api/request_notes.php?request_id=ID → Lists staff notes for a request (includes staff_name and created_at).

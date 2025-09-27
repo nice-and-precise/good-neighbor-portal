@@ -25,7 +25,7 @@
       await loadI18n();
       applyI18n();
     } catch (e) {
-      $('#status').textContent = 'Init failed. Check server.';
+  $('#status').textContent = t('initFailed','Init failed. Check server.');
     }
   }
 
@@ -107,7 +107,7 @@
             <div style="margin-top:.5rem"><em>${o.description || ''}</em></div>
             <hr/>
             <div>
-              <h4 style="margin:.25rem 0">${t('staffControlsDemo','Staff controls (demo)')}</h4>
+              <h4 style="margin:.25rem 0">${t('staffControlsDemo','Staff controls (demo)')} <span class="badge">${t('demoOnly','DEMO ONLY')}</span></h4>
               <label>${t('staffHeaderKey','Staff header key')} <input id="staff-key" type="text" placeholder="demo-staff" style="margin-left:.25rem"/></label>
               <div style="margin-top:.5rem; display:flex; gap:.5rem; flex-wrap:wrap">
                 <button data-action="ack">${t('markAcknowledged','Mark Acknowledged')}</button>
@@ -210,14 +210,14 @@
     const tenant = $('#tenant').value;
     const res = await postJSON('/api/auth_request.php', { email, tenant });
     $('#token').value = res.token || '';
-    $('#status').textContent = res.ok ? 'Token issued (demo: shown below).' : (res.error || 'error');
+  $('#status').textContent = res.ok ? t('tokenIssued','Token issued (demo: shown below).') : (res.error || t('error','error'));
   });
 
   $('#verify').addEventListener('click', async () => {
     const token = $('#token').value.trim();
     const tenant = $('#tenant').value;
     const res = await postJSON('/api/auth_verify.php', { token, tenant });
-    $('#status').textContent = res.ok ? 'Logged in.' : (res.error || 'error');
+  $('#status').textContent = res.ok ? t('loggedIn','Logged in.') : (res.error || t('error','error'));
     if (res.ok) {
       state.loggedIn = true;
       $('#authed').style.display = '';
@@ -277,7 +277,7 @@
       // Refresh dashboard/activity so the new billing line appears immediately
       try { await Promise.all([loadDashboard(), loadActivity()]); } catch {}
     } else {
-      el.textContent = (res && res.message) || 'Payment failed (demo).';
+  el.textContent = (res && res.message) || t('payFailed','Payment failed (demo).');
       showToast(t('payFailed', 'Payment failed (demo).'), 'error');
     }
   });
@@ -291,17 +291,17 @@
     if (!statusSel || !keyInput || !listEl) return;
     const status = statusSel.value;
     const key = (keyInput.value || 'demo-staff').trim();
-    listEl.textContent = 'Loading…';
+  listEl.textContent = t('loading','Loading…');
     try {
       const r = await fetch(`/api/staff_queue.php?status=${encodeURIComponent(status)}`, {
         headers: { 'X-Staff-Key': key }
       });
       const j = await r.json();
-      if (!j.ok) { listEl.textContent = j.error || 'Queue error'; return; }
+  if (!j.ok) { listEl.textContent = j.error || t('queueError','Queue error'); return; }
       const items = (j.items || []).map(it => `<li><a href="#request/${it.id}">#${it.id}</a> — ${it.category} — ${it.status} — ${it.address}</li>`).join('');
       listEl.innerHTML = `<ul style="margin:.25rem 0 0 1rem">${items || '<li>No items</li>'}</ul>`;
     } catch (e) {
-      listEl.textContent = 'Queue load failed';
+  listEl.textContent = t('queueLoadFailed','Queue load failed');
     }
   }
   const qBtn = document.getElementById('queue-load');
@@ -329,11 +329,11 @@
         if (res.ok) {
           await loadI18n(res.lang);
           applyI18n();
-          document.getElementById('i18n-status').textContent = `Language set to ${res.lang}.`;
+          document.getElementById('i18n-status').textContent = t('languageSet','Language set') + `: ${res.lang}.`;
         } else {
-          document.getElementById('i18n-status').textContent = res.error || 'Lang toggle failed';
+          document.getElementById('i18n-status').textContent = res.error || t('langToggleFailed','Lang toggle failed');
         }
-      } catch { document.getElementById('i18n-status').textContent = 'Lang toggle failed'; }
+  } catch { document.getElementById('i18n-status').textContent = t('langToggleFailed','Lang toggle failed'); }
     });
   }
 
@@ -370,7 +370,7 @@
   $('#logout').addEventListener('click', async () => {
     await getJSON('/api/logout.php');
     state.loggedIn = false; $('#authed').style.display = 'none';
-    $('#status').textContent = 'Logged out.';
+  $('#status').textContent = t('loggedOut','Logged out.');
   });
 
   if (document.readyState === 'loading') {

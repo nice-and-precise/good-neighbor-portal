@@ -52,7 +52,7 @@ async function run() {
 
     // Desktop screenshot and DOM
     const ts = timestamp();
-    await page.screenshot({ path: path.join(outDir, `desktop-${ts}.png`), fullPage: true });
+  await page.screenshot({ path: path.join(outDir, `desktop-${ts}.png`), fullPage: true });
     const html = await page.content();
     fs.writeFileSync(path.join(outDir, `dom-${ts}.html`), html, 'utf-8');
 
@@ -62,6 +62,24 @@ async function run() {
       writeJSON(path.join(outDir, `a11y-${ts}.json`), ax);
     } catch (e) {
       writeJSON(path.join(outDir, `a11y-${ts}.json`), { error: String(e) });
+    }
+
+    // Verify i18n toggle (best-effort without login)
+    try {
+      // Click Español and wait for 'Idioma' heading
+      await page.click('button[data-lang="es"]');
+      await page.waitForSelector('[data-i18n="language"]');
+      const headingEs = await page.textContent('[data-i18n="language"]');
+      const i18nOkEs = headingEs && headingEs.toLowerCase().includes('idioma');
+      await page.screenshot({ path: path.join(outDir, `desktop-es-${ts}.png`), fullPage: true });
+      // Switch back to English
+      await page.click('button[data-lang="en"]');
+      await page.waitForSelector('[data-i18n="language"]');
+      const headingEn = await page.textContent('[data-i18n="language"]');
+      const i18nOkEn = headingEn && headingEn.toLowerCase().includes('language');
+      writeJSON(path.join(outDir, `i18n-check-${ts}.json`), { es: !!i18nOkEs, en: !!i18nOkEn, headingEs, headingEn });
+    } catch (e) {
+      writeJSON(path.join(outDir, `i18n-check-${ts}.json`), { error: String(e) });
     }
 
     // Mobile emulation (iPhone 12)
