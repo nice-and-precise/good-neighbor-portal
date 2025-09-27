@@ -2,6 +2,7 @@
   // Keep GitHub Actions linting, but don't warn about unknown/missing secrets locally
   "github-actions.workflows.enableLinting": true,
   "github-actions.workflows.validateSecrets": false,
+  "github-actions.workflows.validateContextAccess": false,
 
   // Ensure YAML uses the GitHub Actions workflow schema for better diagnostics
   "yaml.schemas": {
