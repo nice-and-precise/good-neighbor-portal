@@ -24,5 +24,7 @@
   "statusLabel": "Estado",
   "loadQueue": "Cargar cola",
   "autoRefresh": "Actualización automática",
-  "demoFooter": "Datos de demostración únicamente · M3/M4"
+  "demoFooter": "Datos de demostración únicamente · M3/M4",
+  "paySuccess": "Pago aceptado (demostración).",
+  "payFailed": "Pago fallido (demostración)."
 }

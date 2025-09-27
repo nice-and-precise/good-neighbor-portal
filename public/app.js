@@ -259,10 +259,23 @@
     const el = document.getElementById('pay-status');
     if (res && res.ok) {
       el.textContent = `Paid ${res.amount_cents}c via ${res.method} (demo).`;
+      showToast(t('paySuccess', 'Payment accepted (demo).'), 'success');
+      // Optimistically append billing line item on dashboard if visible
+      try {
+        const money = (c) => `$${(c/100).toFixed(2)}`;
+        const list = document.querySelector('#dashboard ul');
+        if (list) {
+          const li = document.createElement('li');
+          const now = new Date().toISOString().slice(0, 19).replace('T',' ');
+          li.innerHTML = `${now}: Demo payment receipt <strong>${money(res.amount_cents)}</strong>`;
+          list.insertBefore(li, list.firstChild);
+        }
+      } catch {}
       // Refresh dashboard/activity so the new billing line appears immediately
       try { await Promise.all([loadDashboard(), loadActivity()]); } catch {}
     } else {
       el.textContent = (res && res.message) || 'Payment failed (demo).';
+      showToast(t('payFailed', 'Payment failed (demo).'), 'error');
     }
   });
 
@@ -331,6 +344,15 @@
     } catch { i18n.strings = {}; }
   }
   function t(key, fallback) { return i18n.strings[key] || fallback || key; }
+  function showToast(message, kind = 'info') {
+    const el = document.getElementById('toast');
+    if (!el) return;
+    el.textContent = message;
+    el.style.background = (kind === 'error') ? '#b00020' : (kind === 'success') ? '#056608' : '#333';
+    el.style.opacity = '1';
+    clearTimeout(el._timer);
+    el._timer = setTimeout(() => { el.style.opacity = '0'; }, 2500);
+  }
   function applyI18n() {
     // Document title
     document.title = t('title', document.title);
