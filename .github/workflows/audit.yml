@@ -1,0 +1,29 @@
+name: Repository Audit
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'tools/audit-runner.ps1'
+      - '.github/workflows/audit.yml'
+      - '.github/prompts/**'
+      - 'public/**'
+      - 'src/**'
+      - 'data/**'
+      - 'docs/**'
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run audit runner
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -File tools/audit-runner.ps1
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-report
+          path: tools/audit-report.md
