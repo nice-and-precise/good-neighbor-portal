@@ -79,9 +79,11 @@ jobs:
           coverage: none
 
       - name: Install Composer dependencies
+        env:
+          COMPOSER_MEMORY_LIMIT: -1
         run: |
           composer self-update || true
-          composer install --no-interaction --no-progress --memory-limit=-1
+          composer install --no-interaction --no-progress
 
       - name: Run PHPStan (level 0)
         run: |
