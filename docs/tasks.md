@@ -57,3 +57,14 @@ Reference: docs/plan.md, docs/spec.md, docs/decisions.md
 ## Git Hygiene
 - Feature branches per milestone (e.g., feature/m1-scaffold)
 - Atomic commits with clear scopes following Conventional Commits
+
+## A11y & Mobile Checklist
+- Landmarks: Ensure main content is wrapped in a main region; add aria-labels for groups like Billing Actions, Staff Queue, and Service Request
+- Forms: Each input has an associated label; labels click-focus the input; add aria-describedby for helper text where useful
+- Buttons: All interactive elements are buttons or links; provide discernible text via data-i18n or aria-label
+- Focus: Visible focus outline on buttons/inputs; logical tab order; manage focus after login/token verify to dashboard anchor
+- Toasts: Announce via aria-live=polite; ensure role=status on the toast container (present)
+- Contrast: Verify text/background contrast for .muted, .badge, and buttons meets WCAG AA
+- Mobile: Viewport set; ensure cards are responsive with flex-wrap; tap target sizes >= 44px; no horizontal scroll
+- i18n: All user-facing strings have data-i18n keys and translations in en.json/es.json
+- Errors: API errors announced to screen readers and visible in UI

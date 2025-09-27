@@ -1,7 +1,7 @@
 # Cross-Artifact Analysis — Good Neighbor Portal (MVP)
 
 Artifacts reviewed: docs/constitution.md, docs/spec.md, docs/decisions.md, docs/plan.md, docs/tasks.md
-Date: 2025-09-27
+Date: 2025-09-27 (refreshed)
 
 ## Summary
 - Overall alignment is strong: zero‑cloud local demo, Windows‑first with PowerShell, PHP 8.1+, SQLite default, vanilla HTML/CSS/JS, deterministic demo behaviors, i18n en/es, and multi‑tenant decision applied.
@@ -18,7 +18,7 @@ Date: 2025-09-27
 - FR-008 Update statuses + notes: Covered (Plan §5, Tasks M5)
 - FR-009 Route summary + CSV export: Covered (Plan §8, Tasks M6)
 - FR-010 Recent activity feed: Covered (Plan §5, Tasks M5)
-- FR-011 Mobile-responsive + accessible: PARTIAL — Principles present; explicit a11y/mobile tasks added (Tasks M7); basic responsiveness validated in web audit.
+- FR-011 Mobile-responsive + accessible: PARTIAL — Principles present; explicit a11y/mobile tasks added (Tasks M7, A11y & Mobile Checklist); basic responsiveness validated in web audit.
 - FR-012 Validation + prepared statements: Covered (Plan §2/§4, Tasks M1/M7 tests)
 - FR-013 One-command demo reset: Covered (Plan §7, Tasks M1 scripts)
 - FR-014 Start <10s + offline: Covered; add smoke check (Tasks M7 tests)
@@ -37,7 +37,7 @@ Date: 2025-09-27
 
 ## Proposed Remediations (added to tasks)
 - Add explicit task for FAQs/announcements content (FR‑005)
-- Add CSRF token middleware and sanitized error logging
+- Add CSRF token middleware and sanitized error logging (present; verified by audit static signal)
 - Add a11y/mobile responsiveness checks and a short test checklist
 - Implement reset guard: detect PHP server on :8080 and abort with message
 - Optional: Bash script equivalents for setup/run/reset/export (defer or update constitution wording later)

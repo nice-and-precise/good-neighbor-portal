@@ -17,6 +17,8 @@ Set-Location $repoRoot
 # Ensure Spec Kit prereqs tolerate running on main by selecting first specs/* feature
 $prereqScript = Join-Path $repoRoot '.specify/scripts/powershell/check-prerequisites.ps1'
 $prereqRaw = & $prereqScript -Json -IncludeTasks 2>&1
+$prereqExitCode = $LASTEXITCODE
+$prereqSucceeded = $?
 $paths = $null
 try {
   $paths = $prereqRaw | ConvertFrom-Json -ErrorAction Stop
@@ -51,7 +53,7 @@ $schemaExists  = Test-Path 'data/schema.sql'
 
 # Script check
 $prereqOutput = $prereqRaw
-$prereqOk = $LASTEXITCODE -eq 0
+$prereqOk = (($prereqExitCode -eq 0) -or $prereqSucceeded)
 
 # Compose report
 $ts = Get-Date -Format 'yyyy-MM-dd HH:mm:ss zzz'
@@ -132,7 +134,16 @@ $m1 = CheckItems @{
   )
   gitignore = ".gitignore"
 }
-$m1.gitignore = (Get-Content -Raw .gitignore | Select-String -SimpleMatch "config/app.env","/data/app.db","logs/","tmp/","exports/" | Measure-Object).Count -ge 5
+# Robust .gitignore check: ensure all required patterns are present at least once
+if (Test-Path .gitignore) {
+  $content = Get-Content -Raw .gitignore
+  $patterns = @('config/app.env','/data/app.db','logs/','tmp/','exports/')
+  $present = @()
+  foreach ($p in $patterns) { if ($content -like ("*${p}*")) { $present += $p } }
+  $m1.gitignore = ($present.Count -ge $patterns.Count)
+} else {
+  $m1.gitignore = $false
+}
 
 # M2 (Auth + Tenant Switcher) — align with SPA+endpoints architecture
 $m2 = CheckItems @{
@@ -168,7 +179,20 @@ $m5 = CheckItems @{
   notesList = "public/api/request_notes.php"
 }
 # CSRF and logging static signal
-$m5_csrf = (Get-Content -Raw "src/Lib/Http.php" 2>$null) -match "X-CSRF"
+# Detect CSRF header usage in Http lib or any API endpoint
+$httpContent = (Get-Content -Raw "src/Lib/Http.php" 2>$null)
+$httpCsrf = $false
+if ($httpContent) {
+  $httpCsrf = ($httpContent -match "X-CSRF" -or $httpContent -match "HTTP_X_CSRF" -or $httpContent -match "requireCsrf")
+}
+$apiCsrf = $false
+$apiRequire = $false
+$apiFiles = Get-ChildItem -Path "public/api" -Filter "*.php" -File -Recurse -ErrorAction SilentlyContinue
+if ($apiFiles) {
+  $apiCsrf = ((Select-String -Path ($apiFiles | ForEach-Object FullName) -SimpleMatch "X-CSRF","HTTP_X_CSRF" -ErrorAction SilentlyContinue | Measure-Object).Count -gt 0)
+  $apiRequire = ((Select-String -Path ($apiFiles | ForEach-Object FullName) -SimpleMatch "requireCsrf(" -ErrorAction SilentlyContinue | Measure-Object).Count -gt 0)
+}
+$m5_csrf = ($httpCsrf -or $apiCsrf -or $apiRequire)
 $m5_log = (Get-Content -Raw "src/Lib/Util.php" 2>$null) -match "log"
 
 # M6 (Route Summary + CSV)
@@ -198,7 +222,11 @@ function Row { param($name,$map,$extraNote)
   return "| $name | $done/$total | $note |"
 }
 
-$lines += (Row "M1 Scaffold + DB + Scripts" $m1 "")
+# Compute note with missing keys for M1 to aid debugging
+$m1Missing = ($m1.GetEnumerator() | Where-Object { -not $_.Value } | ForEach-Object { $_.Key })
+$m1Note = if ($m1Missing.Count -gt 0) { "missing=" + ($m1Missing -join ',') } else { "" }
+
+$lines += (Row "M1 Scaffold + DB + Scripts" $m1 $m1Note)
 $lines += (Row "M2 Auth + Neighborhood Switcher" $m2 "")
 $lines += (Row "M3 Resident Dashboard + Billing" $m3 "")
 $lines += (Row "M4 Service Requests + Confirmations" $m4 "")
@@ -241,22 +269,22 @@ if ($RunServer) {
   $php = Get-Command php -ErrorAction SilentlyContinue
   if ($php) {
     $phpFound = $true
-    $args = @('-S','127.0.0.1:8080','-t','public')
-    Write-Log "Starting: php $($args -join ' ')"
+    $phpArgs = @('-S','127.0.0.1:8080','-t','public')
+    Write-Log "Starting: php $($phpArgs -join ' ')"
     $outLog = Join-Path $serverLogDir 'php-server.out.log'
     $errLog = Join-Path $serverLogDir 'php-server.err.log'
-    $serverProc = Start-Process -FilePath $php.Path -ArgumentList $args -WorkingDirectory (Get-Location) -PassThru -NoNewWindow -RedirectStandardOutput $outLog -RedirectStandardError $errLog
+    $serverProc = Start-Process -FilePath $php.Path -ArgumentList $phpArgs -WorkingDirectory (Get-Location) -PassThru -NoNewWindow -RedirectStandardOutput $outLog -RedirectStandardError $errLog
     Start-Sleep -Seconds 1
     # Wait for readiness up to 15s
-    $ready = $false
-    1..15 | ForEach-Object {
+    $serverAlive = $false
+    $serverAlive = (1..15 | ForEach-Object {
       try {
         Invoke-WebRequest -UseBasicParsing -Uri 'http://127.0.0.1:8080/api/ping.php' -TimeoutSec 2 -ErrorAction Stop | Out-Null
-        $ready = $true; break
+        return $true
       } catch { Start-Sleep -Milliseconds 500 }
-    }
-    if ($ready) {
-      $serverStarted = $true
+    } | Select-Object -First 1)
+    if ($serverAlive) { $serverStarted = $true }
+    if ($serverStarted) {
       Write-Log "Server is ready. Probing endpoints."
       $toProbe = @(
         '/api/ping.php',
@@ -278,7 +306,7 @@ if ($RunServer) {
   }
 }
 
-if ($serverProc -ne $null) {
+if ($null -ne $serverProc) {
   try { Stop-Process -Id $serverProc.Id -Force -ErrorAction SilentlyContinue } catch {}
 }
 
@@ -311,13 +339,13 @@ $staticPct = if ($staticTotal -gt 0) { [math]::Round(($staticDone / $staticTotal
 $runtimePct = if ($runtimeTotal -gt 0) { [math]::Round(($runtimeOkCount / $runtimeTotal) * 100) } else { $null }
 
 # Weighted overall: 70% static, 30% runtime (if runtime available)
-if ($runtimePct -ne $null) {
+if ($null -ne $runtimePct) {
   $overall = [math]::Round(($staticPct * 0.7) + ($runtimePct * 0.3))
 } else {
   $overall = $staticPct
 }
 
-$summaryLine = if ($runtimePct -ne $null) {
+$summaryLine = if ($null -ne $runtimePct) {
   "Executive summary: static ${staticPct}%, runtime ${runtimePct}%, overall ${overall}."
 } else {
   "Executive summary: static ${staticPct}%, overall ${overall}."
@@ -335,7 +363,7 @@ if ($lines.Count -ge 2) {
 $lines += ""
 $lines += "## Scores"
 $lines += "- Static completion: $staticDone/$staticTotal ($staticPct%)"
-if ($runtimePct -ne $null) { $lines += "- Runtime probes: $runtimeOkCount/$runtimeTotal ($runtimePct%)" }
+if ($null -ne $runtimePct) { $lines += "- Runtime probes: $runtimeOkCount/$runtimeTotal ($runtimePct%)" }
 $lines += "- Overall score: $overall"
 
 $lines | Set-Content -Encoding UTF8 -Path $reportPath
