@@ -2,6 +2,7 @@
 BEGIN TRANSACTION;
 
 INSERT INTO tenants (slug, name) VALUES ('willmar-mn', 'Willmar, Minnesota');
+INSERT INTO tenants (slug, name) VALUES ('kandiyohi-mn', 'Kandiyohi County');
 
 -- Create neighborhoods (simplified)
 INSERT INTO neighborhoods (tenant_id, name, code)
@@ -10,6 +11,12 @@ INSERT INTO neighborhoods (tenant_id, name, code)
 SELECT t.id, 'Northside', 'NS' FROM tenants t WHERE t.slug='willmar-mn';
 INSERT INTO neighborhoods (tenant_id, name, code)
 SELECT t.id, 'Southside', 'SS' FROM tenants t WHERE t.slug='willmar-mn';
+
+-- Second tenant neighborhoods
+INSERT INTO neighborhoods (tenant_id, name, code)
+SELECT t.id, 'Kandi Central', 'KC' FROM tenants t WHERE t.slug='kandiyohi-mn';
+INSERT INTO neighborhoods (tenant_id, name, code)
+SELECT t.id, 'Green Lake', 'GL' FROM tenants t WHERE t.slug='kandiyohi-mn';
 
 -- A few addresses
 INSERT INTO addresses (tenant_id, neighborhood_id, street, unit, lat, lng)
@@ -26,6 +33,17 @@ INSERT INTO addresses (tenant_id, neighborhood_id, street, unit, lat, lng)
 SELECT t.id, n.id, '250 South Rd', NULL, 45.100, -95.030
 FROM tenants t JOIN neighborhoods n ON n.tenant_id=t.id AND n.code='SS'
 WHERE t.slug='willmar-mn';
+
+-- Addresses for second tenant
+INSERT INTO addresses (tenant_id, neighborhood_id, street, unit, lat, lng)
+SELECT t.id, n.id, '200 County Rd 1', NULL, 45.250, -95.200
+FROM tenants t JOIN neighborhoods n ON n.tenant_id=t.id AND n.code='KC'
+WHERE t.slug='kandiyohi-mn';
+
+INSERT INTO addresses (tenant_id, neighborhood_id, street, unit, lat, lng)
+SELECT t.id, n.id, '15 Lakeside Dr', '2B', 45.300, -95.250
+FROM tenants t JOIN neighborhoods n ON n.tenant_id=t.id AND n.code='GL'
+WHERE t.slug='kandiyohi-mn';
 
 -- Demo users
 INSERT INTO users (tenant_id, role, email, display_name)

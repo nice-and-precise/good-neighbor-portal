@@ -9,10 +9,13 @@
     .note { background:#eef; padding:.5rem; border-radius:.25rem; }
     .card { background:#fff; border:1px solid #ddd; border-radius:.5rem; padding:1rem; box-shadow:0 1px 2px rgba(0,0,0,.05); }
     .muted { color:#555; }
+    .badge { display:inline-block; background:#f0f7ff; color:#004085; border:1px solid #b8daff; border-radius:999px; padding:.2rem .6rem; font-size:.9rem; }
     label { display:block; margin-top: .5rem; }
     input, select { padding:.4rem; }
     button { margin-top:.5rem; }
     #authed { display:none; margin-top:1rem; }
+    .row { display:flex; gap:1rem; flex-wrap:wrap; }
+    .col { flex: 1 1 320px; }
   </style>
 </head>
 <body>
@@ -33,9 +36,35 @@
     <button id="verify">Verify token</button>
     <div id="status" class="note" style="margin-top:.5rem"></div>
     <div id="authed" class="note">
-      Logged in. <button id="logout">Logout</button>
-      <div id="dashboard" style="margin-top:.5rem" class="card"></div>
-      <div class="muted" style="margin-top:.25rem">Demo data only · M3</div>
+  Logged in. <button id="logout">Logout</button>
+  <h2 id="dashboard-anchor" style="margin: .75rem 0 0">Your Resident Portal</h2>
+  <div id="tenant-badge" class="badge" style="margin:.25rem 0 0">You're viewing: —</div>
+      <div class="row" style="margin-top:.5rem">
+        <div class="col">
+          <div id="dashboard" class="card"></div>
+        </div>
+        <div class="col">
+          <div id="activity" class="card"></div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <h3 style="margin-top:0">Service Request</h3>
+            <label>Category
+              <select id="req-category">
+                <option value="bulk_pickup">Bulk pickup</option>
+                <option value="container_swap">Container swap</option>
+                <option value="issue_report">Issue report</option>
+              </select>
+            </label>
+            <label>Description
+              <textarea id="req-desc" rows="3" style="width:100%"></textarea>
+            </label>
+            <button id="req-submit">Submit Request</button>
+            <div id="req-status" class="muted" style="margin-top:.5rem"></div>
+          </div>
+        </div>
+      </div>
+      <div class="muted" style="margin-top:.25rem">Demo data only · M3/M4</div>
     </div>
   </section>
   <script src="/app.js"></script>

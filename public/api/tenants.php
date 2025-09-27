@@ -10,7 +10,7 @@ session_start();
 $config = new Config();
 Http::method('GET');
 
-$tenantSlug = $_GET['tenant'] ?? 'willmar-mn';
+$tenantSlug = isset($_GET['tenant']) && $_GET['tenant'] !== '' ? $_GET['tenant'] : 'willmar-mn';
 $db = new Db($config);
 $pdo = $db->pdo();
 

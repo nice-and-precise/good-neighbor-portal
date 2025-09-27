@@ -39,9 +39,14 @@ $stmt2 = $pdo->prepare('SELECT id, amount_cents, description, created_at FROM bi
 $stmt2->execute([$tenantId, $userId]);
 $billing = $stmt2->fetchAll();
 
+$stmt3 = $pdo->prepare('SELECT id, category, status, created_at FROM service_requests WHERE tenant_id = ? AND resident_id = ? ORDER BY id DESC LIMIT 1');
+$stmt3->execute([$tenantId, $userId]);
+$lastReq = $stmt3->fetch() ?: null;
+
 Util::json([
   'ok' => true,
   'profile' => $profile,
   'next_pickup_date' => nextPickupDate((int)$userId),
   'billing' => $billing,
+  'last_request' => $lastReq,
 ]);
