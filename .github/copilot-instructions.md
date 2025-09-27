@@ -220,7 +220,7 @@ pwsh -File .specify/scripts/powershell/export.ps1 -Out ./exports/route-summary.c
 
 ### Common Validation Issues & Solutions
 - **PowerShell extension errors**: Use manual PHP commands instead of setup.ps1
-- **Port conflicts**: Server checks port 8080; use different port or kill: `pkill -f "php -S"`
+- **Port conflicts**: Server checks port 8080; use different port or kill: `pkill -f "php -S 127.0.0.1:8080"`
 - **Database locks**: Stop server before running reset scripts
 - **Missing database**: Run manual setup sequence above
 - **CSRF failures**: Ensure session_start() called before API requests
