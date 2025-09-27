@@ -1,6 +1,6 @@
-# Audit Report - 2025-09-27 17:21:20 -05:00
+# Audit Report - 2025-09-27 17:39:51 -05:00
 
-Executive summary: static 100%, overall 100.
+Executive summary: static 100%, runtime 100%, overall 100.
 ## Phase 1: Data Collection
 - Config template: PASS
 - Schema: PASS
@@ -87,6 +87,22 @@ C:\Users\Owner\Desktop\Damhof_Dumpster\good-neighbor-portal\node_modules\playwri
 | M6 Route Summary + CSV Export | 1/1 |  |
 | M7 i18n + Toggle + Tests | 4/4 |  |
 
+## Runtime Probes
+| Endpoint | Status | Time (ms) | OK |
+|---|---:|---:|:--:|
+| http://127.0.0.1:8080/api/ping.php | 200 | 29 | TRUE |
+| http://127.0.0.1:8080/api/csrf.php | 200 | 5 | TRUE |
+| http://127.0.0.1:8080/api/diag.php | 200 | 7 | TRUE |
+| http://127.0.0.1:8080/api/session.php | 200 | 5 | TRUE |
+| http://127.0.0.1:8080/api/tenants.php | 200 | 6 | TRUE |
+
+### CSRF Runtime
+| Test | Status | OK |
+|---|---:|:--:|
+| post_without_csrf | 403 | TRUE |
+| post_with_csrf | 200 | TRUE |
+
 ## Scores
 - Static completion: 21/21 (100%)
+- Runtime probes: 7/7 (100%)
 - Overall score: 100

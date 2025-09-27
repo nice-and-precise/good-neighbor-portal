@@ -80,5 +80,16 @@
   "queueLoadFailed": "Error al cargar la cola",
   "languageSet": "Idioma establecido",
   "langToggleFailed": "Error al cambiar el idioma",
-  "loggedOut": "Sesión cerrada."
+  "loggedOut": "Sesión cerrada.",
+  "tokenHelp": "Para la demostración, el token se devuelve después de solicitar un enlace mágico.",
+  "catBulkPickup": "Recolección a granel",
+  "catContainerSwap": "Cambio de contenedor",
+  "catIssueReport": "Reporte de problema",
+  "methodCard": "Tarjeta",
+  "methodAch": "ACH",
+  "statusNew": "Nuevo",
+  "statusAck": "Reconocido",
+  "statusInProgress": "En progreso",
+  "statusDone": "Hecho",
+  "statusCancelled": "Cancelado"
 }

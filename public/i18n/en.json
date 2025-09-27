@@ -80,5 +80,16 @@
   "queueLoadFailed": "Queue load failed",
   "languageSet": "Language set",
   "langToggleFailed": "Lang toggle failed",
-  "loggedOut": "Logged out."
+  "loggedOut": "Logged out.",
+  "tokenHelp": "For the demo, the token is returned after requesting a magic link.",
+  "catBulkPickup": "Bulk pickup",
+  "catContainerSwap": "Container swap",
+  "catIssueReport": "Issue report",
+  "methodCard": "Card",
+  "methodAch": "ACH",
+  "statusNew": "New",
+  "statusAck": "Acknowledged",
+  "statusInProgress": "In progress",
+  "statusDone": "Done",
+  "statusCancelled": "Cancelled"
 }

@@ -239,6 +239,7 @@ $lines += (Row "M7 i18n + Toggle + Tests" $m7 "")
 # ------------------------------
 
 $runtimeResults = @()
+$csrfTests = @()
 $runtimeOkCount = 0
 $runtimeTotal = 0
 $phpFound = $false
@@ -298,6 +299,31 @@ if ($RunServer) {
         $res = Invoke-Probe -Url $url -TimeoutSec 8
         $runtimeResults += $res
       }
+
+      # Runtime CSRF probe: keep a single session so PHPSESSID cookie persists
+      $sess = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+      try {
+        $csrfJson = Invoke-RestMethod -Method GET -Uri 'http://127.0.0.1:8080/api/csrf.php' -WebSession $sess -TimeoutSec 5 -ErrorAction Stop
+        $csrfToken = $csrfJson.csrf
+      } catch { $csrfToken = $null }
+
+      try {
+        $noCsrf = Invoke-WebRequest -UseBasicParsing -Method POST -Uri 'http://127.0.0.1:8080/api/auth_request.php' -WebSession $sess -Body '{"email":"ci@example.com","tenant":"willmar-mn"}' -ContentType 'application/json' -TimeoutSec 8 -ErrorAction Stop
+        $csrfTests += [pscustomobject]@{ name='post_without_csrf'; status=$noCsrf.StatusCode; ok=$false }
+      } catch {
+        $code = if ($_.Exception.Response -and $_.Exception.Response.StatusCode) { [int]$_.Exception.Response.StatusCode } else { 0 }
+        $csrfTests += [pscustomobject]@{ name='post_without_csrf'; status=$code; ok=($code -in 401,403) }
+      }
+      if ($null -ne $csrfToken) {
+        try {
+          $headers = @{ 'X-CSRF' = $csrfToken }
+          $withCsrf = Invoke-WebRequest -UseBasicParsing -Method POST -Uri 'http://127.0.0.1:8080/api/auth_request.php' -WebSession $sess -Headers $headers -Body '{"email":"ci@example.com","tenant":"willmar-mn"}' -ContentType 'application/json' -TimeoutSec 8 -ErrorAction Stop
+          $csrfTests += [pscustomobject]@{ name='post_with_csrf'; status=$withCsrf.StatusCode; ok=($withCsrf.StatusCode -in 200,201,202) }
+        } catch {
+          $code = if ($_.Exception.Response -and $_.Exception.Response.StatusCode) { [int]$_.Exception.Response.StatusCode } else { 0 }
+          $csrfTests += [pscustomobject]@{ name='post_with_csrf'; status=$code; ok=$false }
+        }
+      }
     } else {
       Write-Log "Server did not become ready within timeout; skipping runtime probes."
     }
@@ -310,8 +336,9 @@ if ($null -ne $serverProc) {
   try { Stop-Process -Id $serverProc.Id -Force -ErrorAction SilentlyContinue } catch {}
 }
 
-$runtimeTotal = $runtimeResults.Count
-$runtimeOkCount = ($runtimeResults | Where-Object { $_.ok }).Count
+# Include CSRF tests in runtime scoring if present
+$runtimeTotal = $runtimeResults.Count + ($csrfTests.Count)
+$runtimeOkCount = (($runtimeResults | Where-Object { $_.ok }).Count) + (($csrfTests | Where-Object { $_.ok }).Count)
 
 if ($RunServer) {
   $lines += ""
@@ -322,7 +349,16 @@ if ($RunServer) {
     $lines += "| Endpoint | Status | Time (ms) | OK |"
     $lines += "|---|---:|---:|:--:|"
     foreach ($r in $runtimeResults) {
-      $lines += "| $($r.url) | $($r.status) | $($r.ms) | $([string]$r.ok).ToUpper() |"
+      $lines += "| $($r.url) | $($r.status) | $($r.ms) | $(([string]$r.ok).ToUpper()) |"
+    }
+    if ($csrfTests -and $csrfTests.Count -gt 0) {
+      $lines += ""
+      $lines += "### CSRF Runtime"
+      $lines += "| Test | Status | OK |"
+      $lines += "|---|---:|:--:|"
+      foreach ($t in $csrfTests) {
+        $lines += "| $($t.name) | $($t.status) | $(([string]$t.ok).ToUpper()) |"
+      }
     }
   }
 }

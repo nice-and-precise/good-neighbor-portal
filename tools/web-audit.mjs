@@ -101,6 +101,77 @@ async function run() {
       await mctx.close();
     }
 
+    // Contrast check for common selectors
+    try {
+      function toRGB(c) {
+        // Supports rgb(a) and hex
+        if (!c) return [255, 255, 255, 1];
+        if (c.startsWith('rgb')) {
+          const parts = c.replace(/rgba?\(|\)/g, '').split(',').map(s => s.trim());
+          return [parseFloat(parts[0]), parseFloat(parts[1]), parseFloat(parts[2]), parts[3] !== undefined ? parseFloat(parts[3]) : 1];
+        }
+        if (c.startsWith('#')) {
+          let hex = c.slice(1);
+          if (hex.length === 3) hex = hex.split('').map(x => x + x).join('');
+          const num = parseInt(hex, 16);
+          return [(num >> 16) & 255, (num >> 8) & 255, num & 255, 1];
+        }
+        return [255, 255, 255, 1];
+      }
+      function relLuminance([r, g, b]) {
+        const srgb = [r, g, b].map(v => v / 255);
+        const rgb = srgb.map(v => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)));
+        return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
+      }
+      function contrastRatio(fg, bg) {
+        const L1 = relLuminance(fg);
+        const L2 = relLuminance(bg);
+        const lighter = Math.max(L1, L2);
+        const darker = Math.min(L1, L2);
+        return (lighter + 0.05) / (darker + 0.05);
+      }
+      async function getEffectiveBG(page, selector) {
+        return await page.evaluate((sel) => {
+          const el = document.querySelector(sel);
+          if (!el) return null;
+          let node = el;
+          while (node) {
+            const cs = getComputedStyle(node);
+            if (cs && cs.backgroundColor && cs.backgroundColor !== 'rgba(0, 0, 0, 0)' && cs.backgroundColor !== 'transparent') {
+              return cs.backgroundColor;
+            }
+            node = node.parentElement;
+          }
+          return 'rgb(255, 255, 255)';
+        }, selector);
+      }
+      async function getColor(page, selector) {
+        return await page.evaluate((sel) => {
+          const el = document.querySelector(sel);
+          if (!el) return null;
+          const cs = getComputedStyle(el);
+          return cs.color;
+        }, selector);
+      }
+      const selectors = ['.muted', '.badge', 'button'];
+      const results = {};
+      for (const sel of selectors) {
+        const visible = await page.isVisible(sel).catch(() => false);
+        if (!visible) { results[sel] = { present: false }; continue; }
+        const fgCSS = await getColor(page, sel);
+        const bgCSS = await getEffectiveBG(page, sel);
+        if (!fgCSS || !bgCSS) { results[sel] = { present: true, error: 'no colors' }; continue; }
+        const fg = toRGB(fgCSS);
+        const bg = toRGB(bgCSS);
+        const ratio = contrastRatio([fg[0], fg[1], fg[2]], [bg[0], bg[1], bg[2]]);
+        const passAA = ratio >= 4.5; // normal text threshold
+        results[sel] = { present: true, fg: fgCSS, bg: bgCSS, ratio: Number(ratio.toFixed(2)), passAA };
+      }
+      writeJSON(path.join(outDir, `contrast-${ts}.json`), results);
+    } catch (e) {
+      writeJSON(path.join(outDir, `contrast-${ts}.json`), { error: String(e) });
+    }
+
     // Write logs
     writeJSON(path.join(outDir, `console-${ts}.json`), consoleLogs);
     writeJSON(path.join(outDir, `network-${ts}.json`), network);
