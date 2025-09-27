@@ -1,6 +1,4 @@
 name: Apply Branch Protection
-# nudge: retrigger run after fixes
-
 on:
   # Run once when this workflow file is added/changed
   push:
@@ -28,17 +26,16 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GH_API: https://api.github.com
+      ADMIN_TOKEN: ${{ secrets.REPO_ADMIN_TOKEN }}
     steps:
-      - name: Load admin token
-        env:
-          TOKEN: ${{ secrets.REPO_ADMIN_TOKEN }}
+      - name: Validate admin token
+        shell: bash
         run: |
-          if [ -z "$TOKEN" ]; then
+          if [ -z "${ADMIN_TOKEN:-}" ]; then
             echo "REPO_ADMIN_TOKEN is not set. Add it under Settings > Secrets and variables > Actions." >&2
             exit 1
           fi
-          echo "::add-mask::$TOKEN"
-          echo "ADMIN_TOKEN=$TOKEN" >> "$GITHUB_ENV"
+          echo "::add-mask::${ADMIN_TOKEN}"
 
       - name: Derive OWNER/REPO and target branch
         id: meta
@@ -95,7 +92,6 @@ jobs:
             mapfile -t arr < <(echo "$INPUT_CTX" | tr ',' '\n' | sed 's/^ *//; s/ *$//' | sed '/^$/d')
             printf 'Using explicit required checks: %s\n' "${arr[*]}"
             printf '%s\n' "${arr[@]}" | jq -R . | jq -s . > /tmp/contexts.json
-            echo "contexts=$(cat /tmp/contexts.json)" >> "$GITHUB_OUTPUT"
             echo "contexts_file=/tmp/contexts.json" >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -117,7 +113,6 @@ jobs:
             sleep 10
           done
           echo "$REQUIRED_NAMES_JSON" > /tmp/contexts.json
-          echo "contexts=$REQUIRED_NAMES_JSON" >> "$GITHUB_OUTPUT"
           echo "contexts_file=/tmp/contexts.json" >> "$GITHUB_OUTPUT"
 
       - name: Apply branch protection
