@@ -33,11 +33,14 @@ Inputs: docs/constitution.md, docs/spec.md, docs/decisions.md
 - routes(id, neighborhood_id, service_day, route_name, area_code)
 - route_stats(id, route_id, service_day, pickup_count, generated_at)
 
-## 4) Routes
-- GET / → Login OR dashboard
-- POST /magic-link/request → create token, show link/token in UI
-- GET /magic-link/login?token=... → exchange token -> session
-- POST /logout
+## 4) Routes (Current M2 implementation)
+- GET / → Login page (public/index.php)
+- GET /api/csrf.php → CSRF token
+- GET /api/tenants.php → tenant list
+- POST /api/auth_request.php → create token (demo returns it)
+- POST /api/auth_verify.php → exchange token -> session
+- GET /api/session.php → current session
+- GET /api/logout.php → destroy session
 - GET /i18n/:locale.json → localized strings
 - POST /i18n/switch
 - GET /resident/dashboard
@@ -68,9 +71,10 @@ public/index.php, assets/, src/{Controllers,Models,Views,Lib}, config, i18n, dat
 
 ## 9) Scripts (PowerShell)
 - setup.ps1: create DB, run schema.sql, seed.sql (Willmar data), write app.env
-- run.ps1: start PHP built-in server
+- run.ps1: start PHP built-in server and enable sqlite extensions via -d flags
 - reset-demo.ps1: guard server running; recreate DB; re-seed
 - export.ps1: GET reports/route-summary.csv and save to exports/
+- test-auth.ps1: end-to-end test for demo auth flow using a persisted WebSession
 
 ## 10) Tests
 - tests/smoke.ps1: headless flow — request magic link, login, create request, staff sees it, update status, export CSV

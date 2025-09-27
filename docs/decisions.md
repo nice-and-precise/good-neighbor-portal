@@ -14,3 +14,7 @@ These are the selected answers from /clarify that drive architecture and scope.
 10. Staff tools scope: A — Minimal (view queue, update status, notes, CSV export)
 
 Assumptions: “Willmar, MN” used in demo data (addresses/areas); no external services used; magic‑link displayed in UI as a copyable link/token.
+
+Repository & Release Management:
+- Repository visibility: Private by default; collaborators added explicitly as needed
+- CHANGELOG: Maintain `CHANGELOG.md` with milestone summaries (M1, M2, ...)

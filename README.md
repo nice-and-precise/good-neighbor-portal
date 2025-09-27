@@ -27,6 +27,11 @@ Use these slash commands in your AI assistant:
 - uv
 - Git
 - VS Code + Copilot
+- PHP 8.1+ (Windows-friendly; winget package works well)
+
+Notes:
+- The dev server script enables SQLite extensions automatically at runtime; no php.ini edits needed.
+- SQLite database lives at `data/app.db` and is created/seeded by setup.
 
 ## Quick Commands
 
@@ -36,7 +41,7 @@ specify check
 # In the editor chat, run the slash commands in order above.
 ```
 
-## Develop and Run (M1)
+## Develop and Run (M2)
 
 ```powershell
 # First-time setup: create config, migrate DB, seed demo data
@@ -50,4 +55,29 @@ specify check
 
 # Export placeholder CSV (will be replaced in later milestone)
 .\.specify\scripts\powershell\export.ps1 -Out .\exports\route-summary.csv
+
+# Optional: E2E test of the demo auth flow (magic-link style)
+.\.specify\scripts\powershell\test-auth.ps1 -Email resident@example.com
 ```
+
+### Demo Auth Flow (M2)
+
+- Open http://127.0.0.1:8080
+- Select a tenant (default: Willmar, Minnesota)
+- Enter your email and click “Request magic link (demo shows token)”
+- Copy the returned token (auto-filled) and click “Verify token”
+- You should see “Logged in.” and `/api/session.php` will show your session
+
+### Diagnostics
+
+- Quick environment check: http://127.0.0.1:8080/api/diag.php
+	- Confirms `pdo_sqlite`/`sqlite3` extensions are loaded and shows `pdo_drivers`
+
+### Endpoints (M2)
+
+- `GET /api/csrf.php` → CSRF token
+- `GET /api/tenants.php` → tenant list + active
+- `POST /api/auth_request.php` → issues demo token (would be emailed in prod)
+- `POST /api/auth_verify.php` → verifies token and binds session
+- `GET /api/session.php` → current session
+- `GET /api/logout.php` → clears session

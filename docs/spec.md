@@ -21,6 +21,7 @@ West Central Sanitation needs a demo-ready MVP portal that runs entirely on a de
 
 ### Functional Requirements
 - **FR-001**: System MUST provide demo login for resident and staff user types
+	- M2 note: Implemented as offline demo magic-link flow (token displayed on-screen; no email)
 - **FR-002**: System MUST display next pickup date and service calendar from demo data
 - **FR-003**: System MUST show billing history and demo "Pay now" action with sandbox messaging
 - **FR-004**: Residents MUST be able to submit service requests (bulk pickup, start/stop service, container swap, issue report)
