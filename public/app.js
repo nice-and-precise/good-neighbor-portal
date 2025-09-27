@@ -3,13 +3,13 @@
   const $ = (s) => document.querySelector(s);
 
   async function getJSON(url, opts={}) {
-    const res = await fetch(url, opts);
+    const res = await fetch(url, { credentials: 'same-origin', ...opts });
     return res.json();
   }
   async function postJSON(url, data, extraHeaders={}) {
     const headers = { 'Content-Type': 'application/json', ...extraHeaders };
     if (state.csrf) headers['X-CSRF'] = state.csrf;
-    const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(data) });
+    const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(data), credentials: 'same-origin' });
     return res.json();
   }
 
@@ -25,7 +25,8 @@
       await loadI18n();
       applyI18n();
     } catch (e) {
-  $('#status').textContent = t('initFailed','Init failed. Check server.');
+      console.error('Init failed', e);
+      $('#status').textContent = t('initFailed','Init failed. Check server.');
     }
   }
 

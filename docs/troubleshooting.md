@@ -7,8 +7,17 @@
 - Port in use? Use `-Port 0` to auto-pick an open port.
 
 ### SQLite driver errors
-- The dev server script enables `pdo_sqlite`/`sqlite3` at runtime. Use the provided run script.
-- Confirm via http://127.0.0.1:8080/api/diag.php
+- The dev server script enables `pdo_sqlite`/`sqlite3` at runtime if you use the PowerShell run scripts. If you’re starting PHP manually, these extensions must be enabled in your `php.ini`.
+- Confirm via http://127.0.0.1:8080/api/diag.php (look for `has.pdo_sqlite = true` and `has.sqlite3 = true`).
+
+#### Enable SQLite on Windows (php.ini)
+1. Locate your PHP installation (e.g., `C:\php`). Find `php.ini` (or copy `php.ini-development` to `php.ini`).
+2. Open `php.ini` and ensure these lines are present (uncomment by removing `;`):
+	- `extension_dir = "C:\\php\\ext"`
+	- `extension=pdo_sqlite`
+	- `extension=sqlite3`
+3. Restart your PHP built-in server and reload `/api/diag.php` to verify.
+4. If you still see `could not find driver`, ensure there isn’t another PHP on PATH without these extensions enabled.
 
 ### CSRF or session errors in tests
 - Always call `/api/csrf.php` first and reuse the cookie for subsequent requests.

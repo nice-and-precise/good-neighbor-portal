@@ -7,6 +7,7 @@ use PDOException;
 
 class Db {
     private PDO $pdo;
+    private string $dsn;
 
     public function __construct(Config $config) {
         $dsn = $config->get('DB_DSN', 'sqlite:./data/app.db');
@@ -33,7 +34,16 @@ class Db {
                 }
             }
         }
-
+        $this->dsn = $dsn;
+        // Proactive check for SQLite driver availability on environments (e.g., Windows) where extensions may be disabled
+        if (str_starts_with($dsn, 'sqlite:')) {
+            if (!extension_loaded('pdo')) {
+                throw new \RuntimeException('PDO extension not loaded. Enable it in php.ini.');
+            }
+            if (!extension_loaded('sqlite3') || !extension_loaded('pdo_sqlite')) {
+                throw new \RuntimeException('SQLite driver not available (pdo_sqlite/sqlite3). See docs/troubleshooting.md#enable-sqlite-on-windows');
+            }
+        }
         $this->pdo = new PDO($dsn, $user ?: null, $pass ?: null, $options);
         if (str_starts_with($dsn, 'sqlite:')) {
             $this->pdo->exec('PRAGMA foreign_keys = ON;');
@@ -52,5 +62,34 @@ class Db {
         $sql = file_get_contents($seedPath);
         if ($sql === false) throw new \RuntimeException('Cannot read seed.sql');
         $this->pdo->exec($sql);
+    }
+
+    /** Returns true if using SQLite driver */
+    public function isSqlite(): bool {
+        try { return $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite'; }
+        catch (\Throwable $e) { return str_starts_with($this->dsn, 'sqlite:'); }
+    }
+
+    /** For SQLite: check whether a table exists */
+    public function tableExists(string $name): bool {
+        if (!$this->isSqlite()) return false;
+        $stmt = $this->pdo->prepare("SELECT name FROM sqlite_master WHERE type='table' AND name = ?");
+        $stmt->execute([$name]);
+        return (bool)$stmt->fetchColumn();
+    }
+
+    /** Ensure schema (and optional seed) are applied on first run */
+    public function ensureBootstrapped(string $schemaPath, ?string $seedPath = null): void {
+        if (!$this->isSqlite()) return; // only auto-bootstrap for SQLite
+        // If tenants table missing, assume first run
+        $ok = false;
+        try { $ok = $this->tableExists('tenants'); } catch (\Throwable $e) { $ok = false; }
+        if (!$ok) {
+            if (!is_file($schemaPath)) throw new \RuntimeException('Schema file not found: ' . $schemaPath);
+            $this->migrate($schemaPath);
+            if ($seedPath && is_file($seedPath)) {
+                $this->seed($seedPath);
+            }
+        }
     }
 }

@@ -11,8 +11,21 @@ $config = new Config();
 Http::method('GET');
 
 $tenantSlug = isset($_GET['tenant']) && $_GET['tenant'] !== '' ? $_GET['tenant'] : 'willmar-mn';
-$db = new Db($config);
-$pdo = $db->pdo();
+try {
+  $db = new Db($config);
+  $db->ensureBootstrapped(__DIR__ . '/../../data/schema.sql', __DIR__ . '/../../data/seed.sql');
+  $pdo = $db->pdo();
+} catch (Throwable $e) {
+  http_response_code(500);
+  Util::json([
+    'ok' => false,
+    'error' => 'db_driver_missing',
+    'message' => 'SQLite driver not available on server. Enable pdo_sqlite and sqlite3 in php.ini.',
+    'details' => $e->getMessage(),
+    'docs' => '/docs/troubleshooting.md#enable-sqlite-on-windows'
+  ], 500);
+  exit;
+}
 
 $stmt = $pdo->prepare('SELECT id, slug, name FROM tenants ORDER BY name');
 $stmt->execute();
