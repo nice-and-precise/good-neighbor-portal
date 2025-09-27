@@ -95,6 +95,7 @@ jobs:
             printf 'Using explicit required checks: %s\n' "${arr[*]}"
             printf '%s\n' "${arr[@]}" | jq -R . | jq -s . > /tmp/contexts.json
             echo "contexts=$(cat /tmp/contexts.json)" >> "$GITHUB_OUTPUT"
+            echo "contexts_file=/tmp/contexts.json" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           REQUIRED_NAMES_JSON="[]"
@@ -102,7 +103,10 @@ jobs:
             RESP=$(curl -fsSL -H "Authorization: Bearer $ADMIN_TOKEN" -H "Accept: application/vnd.github+json" \
               "$GH_API/repos/$OWNER/$REPO/commits/$SHA/check-runs?per_page=100")
             # Collect GitHub Actions check run names, excluding this workflow's job if any
-            NAMES=$(echo "$RESP" | jq -c '[.check_runs[] | select(.app.slug=="github-actions") | select(.name|test("Apply Branch Protection")|not) | .name] | unique') || NAMES="[]"
+            NAMES=$(echo "$RESP" | jq -c '[.check_runs[]
+              | select(.app.slug=="github-actions")
+              | select((.name|test("Apply Branch Protection")|not) and (.name != "Protect branch"))
+              | .name] | unique') || NAMES="[]"
             COUNT=$(echo "$NAMES" | jq 'length')
             echo "Detected $COUNT GitHub Actions check run name(s): $NAMES"
             if [ "$COUNT" -gt 0 ]; then
@@ -111,7 +115,9 @@ jobs:
             fi
             sleep 10
           done
+          echo "$REQUIRED_NAMES_JSON" > /tmp/contexts.json
           echo "contexts=$REQUIRED_NAMES_JSON" >> "$GITHUB_OUTPUT"
+          echo "contexts_file=/tmp/contexts.json" >> "$GITHUB_OUTPUT"
 
       - name: Apply branch protection
         id: protect
@@ -121,31 +127,27 @@ jobs:
           OWNER="${{ steps.meta.outputs.owner }}"
           REPO="${{ steps.meta.outputs.repo }}"
           BRANCH="${{ steps.meta.outputs.branch }}"
-          CONTEXTS='${{ steps.checks.outputs.contexts }}'
-          # Fallback: if still empty, don't set required checks but keep other protections
-          HAS_CONTEXTS=$(echo "$CONTEXTS" | jq 'length')
-          if [ "$HAS_CONTEXTS" -gt 0 ]; then
-            REQUIRED_STATUS_CHECKS=$(jq -c --argjson ctx "$CONTEXTS" '{strict: true, contexts: $ctx}')
-          else
-            REQUIRED_STATUS_CHECKS=$(jq -c -n '{strict: true, contexts: []}')
+          CONTEXTS_FILE='${{ steps.checks.outputs.contexts_file }}'
+          if [ -z "$CONTEXTS_FILE" ] || [ ! -s "$CONTEXTS_FILE" ]; then
+            echo '[]' > /tmp/contexts.json
+            CONTEXTS_FILE=/tmp/contexts.json
           fi
-          BODY=$(jq -c -n \
-            --argjson rsc "$REQUIRED_STATUS_CHECKS" \
-            '{
-              required_status_checks: $rsc,
-              enforce_admins: true,
-              required_pull_request_reviews: {
-                required_approving_review_count: 1,
-                dismiss_stale_reviews: true,
-                require_code_owner_reviews: true
-              },
-              restrictions: null,
-              required_linear_history: true,
-              allow_force_pushes: false,
-              allow_deletions: false,
-              lock_branch: false,
-              required_conversation_resolution: true
-            }')
+          echo "Using contexts file: $CONTEXTS_FILE"
+          BODY=$(jq -c -n --slurpfile ctx "$CONTEXTS_FILE" '{
+            required_status_checks: { strict: true, contexts: $ctx[0] },
+            enforce_admins: true,
+            required_pull_request_reviews: {
+              required_approving_review_count: 1,
+              dismiss_stale_reviews: true,
+              require_code_owner_reviews: true
+            },
+            restrictions: null,
+            required_linear_history: true,
+            allow_force_pushes: false,
+            allow_deletions: false,
+            lock_branch: false,
+            required_conversation_resolution: true
+          }')
           echo "Applying protection to $OWNER/$REPO@$BRANCH"
           curl -fsSL -X PUT \
             -H "Authorization: Bearer $ADMIN_TOKEN" \
