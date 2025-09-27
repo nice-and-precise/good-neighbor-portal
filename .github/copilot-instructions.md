@@ -54,37 +54,8 @@ SEED_DEMO=true SCHEMA_PATH=./data/schema.sql SEED_PATH=./data/seed.sql php tmp/m
 ```bash
 # Manual setup that always works:
 mkdir -p tmp
-echo '<?php
-$dsn = "sqlite:./data/app.db";
-try {
-    if (!file_exists("./data/schema.sql")) {
-        fwrite(STDERR, "Error: schema.sql not found.\n");
-        exit(1);
-    }
-    if (!file_exists("./data/seed.sql")) {
-        fwrite(STDERR, "Error: seed.sql not found.\n");
-        exit(1);
-    }
-    $pdo = new PDO($dsn);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $schema = file_get_contents("./data/schema.sql");
-    if ($schema === false) {
-        fwrite(STDERR, "Error: Failed to read schema.sql\n");
-        exit(1);
-    }
-    $pdo->exec($schema);
-    $seed = file_get_contents("./data/seed.sql");
-    if ($seed === false) {
-        fwrite(STDERR, "Error: Failed to read seed.sql\n");
-        exit(1);
-    }
-    $pdo->exec($seed);
-    echo "Database setup complete\n";
-} catch (PDOException $e) {
-    fwrite(STDERR, "Database error: " . $e->getMessage() . "\n");
-    exit(1);
-}
-?>' > tmp/migrate.php && php tmp/migrate.php
+# Run the migration script to set up the database
+php tmp/migrate.php
 cp config/app.example.env config/app.env
 ```
 
