@@ -22,6 +22,8 @@
       sel.innerHTML = tns.tenants.map(t => `<option value="${t.slug}" ${t.slug===tns.active?'selected':''}>${t.name}</option>`).join('');
       state.tenant = sel.value;
       $('#status').textContent = '';
+      await loadI18n();
+      applyI18n();
     } catch (e) {
       $('#status').textContent = 'Init failed. Check server.';
     }
@@ -292,9 +294,43 @@
       const lang = btn.getAttribute('data-lang');
       try {
         const res = await postJSON('/api/i18n_switch.php', { lang });
-        document.getElementById('i18n-status').textContent = res.ok ? `Language set to ${res.lang}.` : (res.error || 'Lang toggle failed');
+        if (res.ok) {
+          await loadI18n(res.lang);
+          applyI18n();
+          document.getElementById('i18n-status').textContent = `Language set to ${res.lang}.`;
+        } else {
+          document.getElementById('i18n-status').textContent = res.error || 'Lang toggle failed';
+        }
       } catch { document.getElementById('i18n-status').textContent = 'Lang toggle failed'; }
     });
+  }
+
+  // i18n support
+  const i18n = { lang: 'en', strings: {} };
+  async function loadI18n(next) {
+    i18n.lang = next || i18n.lang || 'en';
+    try {
+      const res = await fetch(`/i18n/${i18n.lang}.json`, { cache: 'no-store' });
+      i18n.strings = await res.json();
+    } catch { i18n.strings = {}; }
+  }
+  function t(key, fallback) { return i18n.strings[key] || fallback || key; }
+  function applyI18n() {
+    const map = [
+      ['title', 'title'],
+      ['.note + section h2', 'demoLogin'],
+      ['#faqs h3', 'faqs'],
+      ['#billing-actions h3', 'billingActions'],
+      ['#i18n h3', 'language'],
+      ['.card h3', 'serviceRequest'] // first service request card title; later target by id
+    ];
+    // Document title
+    document.title = t('title', document.title);
+    // Apply mapped elements if they exist
+    for (const [selector, key] of map) {
+      const el = document.querySelector(selector);
+      if (el) el.textContent = t(key, el.textContent);
+    }
   }
 
   $('#logout').addEventListener('click', async () => {
