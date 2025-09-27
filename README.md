@@ -92,10 +92,6 @@ specify check
 - `GET /api/recent_activity.php` → latest service requests and billing entries (combined)
 - UI adds a “Recent Activity” card and a “Service Request” form card shown after login
 
-### Recent Activity (M3.1)
-
-- `GET /api/recent_activity.php` → latest service requests and billing entries (combined)
-
 ### Multi-tenant demo
 
 - Seed includes a second tenant `kandiyohi-mn` with neighborhoods and addresses
