@@ -35,6 +35,11 @@ jobs:
       issues: write
     steps:
       - uses: actions/checkout@v4
+      - name: Setup PHP for runtime probes
+        if: github.event_name == 'workflow_dispatch' && inputs.runserver == 'true'
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
       - name: Run audit runner (push)
         shell: pwsh
         if: github.event_name == 'push'
