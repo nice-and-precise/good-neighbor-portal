@@ -68,3 +68,9 @@ Reference: docs/plan.md, docs/spec.md, docs/decisions.md
 - Mobile: Viewport set; ensure cards are responsive with flex-wrap; tap target sizes >= 44px; no horizontal scroll
 - i18n: All user-facing strings have data-i18n keys and translations in en.json/es.json
 - Errors: API errors announced to screen readers and visible in UI
+
+### Progress (2025-09-27)
+- Done: Main landmark + skip link; language toggle grouped and `aria-pressed` maintained; status regions use `role="status"` + `aria-live=polite`.
+- Done: Buttons have explicit `type="button"`; inputs have improved padding and focus outline; mobile tap targets and horizontal scroll guard applied.
+- Done: Helper text for token with `aria-describedby`; programmatic focus moves to dashboard anchor after login.
+- In progress: Contrast review for all variants; expand data-i18n coverage; ensure error announcements in all error paths.
