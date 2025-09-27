@@ -365,6 +365,16 @@
       if (!key) return;
       el.textContent = t(key, el.textContent);
     });
+    // Mark active language toggle button via aria-pressed
+    try {
+      const group = document.querySelector('#i18n [role="group"]');
+      if (group) {
+        group.querySelectorAll('button[data-lang]').forEach(btn => {
+          const isActive = btn.getAttribute('data-lang') === (i18n.lang || 'en');
+          btn.setAttribute('aria-pressed', String(isActive));
+        });
+      }
+    } catch {}
   }
 
   $('#logout').addEventListener('click', async () => {

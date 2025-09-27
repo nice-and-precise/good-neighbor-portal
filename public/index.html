@@ -6,6 +6,8 @@
   <title>Good Neighbor Portal</title>
   <style>
     body { font-family: system-ui, sans-serif; margin: 1rem; }
+    .skip-link { position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden; }
+    .skip-link:focus { position:static; width:auto; height:auto; padding:.5rem; background:#004085; color:#fff; border-radius:.25rem; display:inline-block; margin-bottom:.5rem; }
     .note { background:#eef; padding:.5rem; border-radius:.25rem; }
     .card { background:#fff; border:1px solid #ddd; border-radius:.5rem; padding:1rem; box-shadow:0 1px 2px rgba(0,0,0,.05); }
     .muted { color:#555; }
@@ -19,24 +21,26 @@
   </style>
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to main content</a>
   <h1 data-i18n="title">Good Neighbor Portal</h1>
   <p class="note" data-i18n="scaffoldReady">Scaffold ready. Use the scripts to setup and run the app.</p>
+  <main id="main">
   <section>
     <h2 data-i18n="demoLogin">Demo Login</h2>
     <label><span data-i18n="tenantLabel">Tenant</span>
       <select id="tenant"></select>
     </label>
     <label><span data-i18n="emailLabel">Email</span>
-      <input id="email" type="email" placeholder="you@example.com" />
+      <input id="email" type="email" autocomplete="email" placeholder="you@example.com" />
     </label>
-    <button id="request" data-i18n="requestMagicLink">Request magic link (demo shows token)</button>
+    <button id="request" type="button" data-i18n="requestMagicLink">Request magic link (demo shows token)</button>
     <label><span data-i18n="tokenLabel">Token</span>
       <input id="token" type="text" />
     </label>
-    <button id="verify" data-i18n="verifyToken">Verify token</button>
-    <div id="status" class="note" style="margin-top:.5rem"></div>
+    <button id="verify" type="button" data-i18n="verifyToken">Verify token</button>
+    <div id="status" class="note" role="status" aria-live="polite" style="margin-top:.5rem"></div>
     <div id="authed" class="note">
-  <span data-i18n="loggedIn">Logged in.</span> <button id="logout" data-i18n="logout">Logout</button>
+  <span data-i18n="loggedIn">Logged in.</span> <button id="logout" type="button" data-i18n="logout">Logout</button>
   <h2 id="dashboard-anchor" style="margin: .75rem 0 0" data-i18n="residentPortal">Your Resident Portal</h2>
   <div id="tenant-badge" class="badge" style="margin:.25rem 0 0">You're viewing: —</div>
       <div class="row" style="margin-top:.5rem">
@@ -59,8 +63,8 @@
             <label><span data-i18n="descriptionLabel">Description</span>
               <textarea id="req-desc" rows="3" style="width:100%"></textarea>
             </label>
-            <button id="req-submit" data-i18n="submitRequest">Submit Request</button>
-            <div id="req-status" class="muted" style="margin-top:.5rem"></div>
+            <button id="req-submit" type="button" data-i18n="submitRequest">Submit Request</button>
+            <div id="req-status" class="muted" role="status" aria-live="polite" style="margin-top:.5rem"></div>
           </div>
         </div>
       </div>
@@ -84,8 +88,8 @@
             <label><span data-i18n="methodLabel">Method</span>
               <select id="pay-method"><option value="card">Card</option><option value="ach">ACH</option></select>
             </label>
-            <button id="pay-now" data-i18n="payNowDemo">Pay now (demo)</button>
-            <div id="pay-status" class="muted" style="margin-top:.5rem"></div>
+            <button id="pay-now" type="button" data-i18n="payNowDemo">Pay now (demo)</button>
+            <div id="pay-status" class="muted" role="status" aria-live="polite" style="margin-top:.5rem"></div>
           </div>
         </div>
         <div class="col">
@@ -102,7 +106,7 @@
               </select>
             </label>
             <label><input id="queue-auto" type="checkbox" /> <span data-i18n="autoRefresh">Auto-refresh</span></label>
-            <button id="queue-load" data-i18n="loadQueue">Load queue</button>
+            <button id="queue-load" type="button" data-i18n="loadQueue">Load queue</button>
             <div id="queue-list" class="muted" style="margin-top:.5rem"></div>
           </div>
         </div>
@@ -111,8 +115,10 @@
         <div class="col">
           <div id="i18n" class="card">
             <h3 style="margin-top:0" data-i18n="language">Language</h3>
-            <button data-lang="en">English</button>
-            <button data-lang="es">Español</button>
+            <div role="group" aria-label="Language toggle">
+              <button type="button" data-lang="en" aria-pressed="true">English</button>
+              <button type="button" data-lang="es" aria-pressed="false">Español</button>
+            </div>
             <div id="i18n-status" class="muted" style="margin-top:.25rem"></div>
           </div>
         </div>
@@ -127,6 +133,7 @@
       <div class="muted" style="margin-top:.25rem" data-i18n="demoFooter">Demo data only · M3/M4</div>
     </div>
   </section>
+  </main>
   <div id="toast" role="status" aria-live="polite" style="position:fixed;right:1rem;bottom:1rem;background:#333;color:#fff;padding:.5rem .75rem;border-radius:.4rem;box-shadow:0 2px 8px rgba(0,0,0,.2);opacity:0;transition:opacity .2s;max-width:60ch"></div>
   <script src="/app.js"></script>
 </body>
