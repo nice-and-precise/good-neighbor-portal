@@ -3,13 +3,20 @@
 # Runs the Autonomous Audit Phase 1 probes and writes tools/audit-report.md
 
 param(
-  [switch]$Open
+  [switch]$Open,
+  [switch]$RunServer,
+  [switch]$DraftIssue
 )
 
 $ErrorActionPreference = 'Stop'
 
+# Normalize working directory to repo root (script is in repo/tools)
+$repoRoot = Split-Path -Parent $PSScriptRoot
+Set-Location $repoRoot
+
 # Ensure Spec Kit prereqs tolerate running on main by selecting first specs/* feature
-$prereqRaw = & .\.specify\scripts\powershell\check-prerequisites.ps1 -Json -IncludeTasks 2>&1
+$prereqScript = Join-Path $repoRoot '.specify/scripts/powershell/check-prerequisites.ps1'
+$prereqRaw = & $prereqScript -Json -IncludeTasks 2>&1
 $paths = $null
 try {
   $paths = $prereqRaw | ConvertFrom-Json -ErrorAction Stop
@@ -30,6 +37,12 @@ if ($paths -and $paths.FEATURE_DIR) {
 }
 
 $reportPath = Join-Path (Get-Location) 'tools/audit-report.md'
+
+# Utility: Write-Log
+function Write-Log {
+  param([string]$Message)
+  Write-Host "[audit] $Message"
+}
 
 # Phase 1: Data collection
 $structureSample = & pwsh -NoProfile -Command "Get-ChildItem -Recurse -File -Include *.php,*.md,*.sql,*.ps1 | Select-Object -First 50 | ForEach-Object FullName" 2>$null
@@ -198,7 +211,189 @@ $lines += (Row "M5 Staff Queue + Notes + Polling" $m5 ("csrf=" + ($m5_csrf) + ",
 $lines += (Row "M6 Route Summary + CSV Export" $m6 "")
 $lines += (Row "M7 i18n + Toggle + Tests" $m7 "")
 
+# ------------------------------
+# Optional Phase 3: Runtime Probes (-RunServer)
+# ------------------------------
+
+$runtimeResults = @()
+$runtimeOkCount = 0
+$runtimeTotal = 0
+$phpFound = $false
+$serverStarted = $false
+$serverProc = $null
+$serverLogDir = Join-Path (Get-Location) 'tmp'
+if (-not (Test-Path $serverLogDir)) { New-Item -ItemType Directory -Path $serverLogDir | Out-Null }
+
+function AcceptableStatus([int]$code) { return ($code -in 200,201,202,204,301,302,401,403) }
+
+function Invoke-Probe {
+  param([string]$Url,[int]$TimeoutSec = 10)
+  $sw = [System.Diagnostics.Stopwatch]::StartNew()
+  try {
+    $resp = Invoke-WebRequest -UseBasicParsing -Uri $Url -Method GET -TimeoutSec $TimeoutSec -ErrorAction Stop
+    $sw.Stop()
+    return [pscustomobject]@{ url=$Url; status=$resp.StatusCode; ms=[int]$sw.Elapsed.TotalMilliseconds; ok=(AcceptableStatus($resp.StatusCode)) }
+  } catch {
+    $sw.Stop()
+    $code = if ($_.Exception.Response -and $_.Exception.Response.StatusCode) { [int]$_.Exception.Response.StatusCode } else { 0 }
+    $ok = if ($code -ne 0) { AcceptableStatus($code) } else { $false }
+    return [pscustomobject]@{ url=$Url; status=$code; ms=[int]$sw.Elapsed.TotalMilliseconds; ok=$ok; error=$_.Exception.Message }
+  }
+}
+
+if ($RunServer) {
+  Write-Log "RunServer flag detected; attempting to start PHP built-in server."
+  $php = Get-Command php -ErrorAction SilentlyContinue
+  if ($php) {
+    $phpFound = $true
+    $args = @('-S','127.0.0.1:8080','-t','public')
+    Write-Log "Starting: php $($args -join ' ')"
+    $outLog = Join-Path $serverLogDir 'php-server.out.log'
+    $errLog = Join-Path $serverLogDir 'php-server.err.log'
+    $serverProc = Start-Process -FilePath $php.Path -ArgumentList $args -WorkingDirectory (Get-Location) -PassThru -NoNewWindow -RedirectStandardOutput $outLog -RedirectStandardError $errLog
+    Start-Sleep -Seconds 1
+    # Wait for readiness up to 15s
+    $ready = $false
+    1..15 | ForEach-Object {
+      try {
+        Invoke-WebRequest -UseBasicParsing -Uri 'http://127.0.0.1:8080/api/ping.php' -TimeoutSec 2 -ErrorAction Stop | Out-Null
+        $ready = $true; break
+      } catch { Start-Sleep -Milliseconds 500 }
+    }
+    if ($ready) {
+      $serverStarted = $true
+      Write-Log "Server is ready. Probing endpoints."
+      $toProbe = @(
+        '/api/ping.php',
+        '/api/csrf.php',
+        '/api/diag.php',
+        '/api/session.php',
+        '/api/tenants.php'
+      )
+      foreach ($p in $toProbe) {
+        $url = "http://127.0.0.1:8080$p"
+        $res = Invoke-Probe -Url $url -TimeoutSec 8
+        $runtimeResults += $res
+      }
+    } else {
+      Write-Log "Server did not become ready within timeout; skipping runtime probes."
+    }
+  } else {
+    Write-Log "php not found on PATH; skipping runtime probes."
+  }
+}
+
+if ($serverProc -ne $null) {
+  try { Stop-Process -Id $serverProc.Id -Force -ErrorAction SilentlyContinue } catch {}
+}
+
+$runtimeTotal = $runtimeResults.Count
+$runtimeOkCount = ($runtimeResults | Where-Object { $_.ok }).Count
+
+if ($RunServer) {
+  $lines += ""
+  $lines += "## Runtime Probes"
+  if (-not $phpFound) { $lines += "> php executable not found — runtime probes skipped." }
+  elseif (-not $serverStarted) { $lines += "> Server failed to start — runtime probes skipped." }
+  else {
+    $lines += "| Endpoint | Status | Time (ms) | OK |"
+    $lines += "|---|---:|---:|:--:|"
+    foreach ($r in $runtimeResults) {
+      $lines += "| $($r.url) | $($r.status) | $($r.ms) | $([string]$r.ok).ToUpper() |"
+    }
+  }
+}
+
+# ------------------------------
+# Scoring and Executive Summary
+# ------------------------------
+
+$allMaps = @($m1,$m2,$m3,$m4,$m5,$m6,$m7)
+$staticDone = ($allMaps | ForEach-Object { SumTrue $_ } | Measure-Object -Sum).Sum
+$staticTotal = ($allMaps | ForEach-Object { CountItems $_ } | Measure-Object -Sum).Sum
+$staticPct = if ($staticTotal -gt 0) { [math]::Round(($staticDone / $staticTotal) * 100) } else { 0 }
+
+$runtimePct = if ($runtimeTotal -gt 0) { [math]::Round(($runtimeOkCount / $runtimeTotal) * 100) } else { $null }
+
+# Weighted overall: 70% static, 30% runtime (if runtime available)
+if ($runtimePct -ne $null) {
+  $overall = [math]::Round(($staticPct * 0.7) + ($runtimePct * 0.3))
+} else {
+  $overall = $staticPct
+}
+
+$summaryLine = if ($runtimePct -ne $null) {
+  "Executive summary: static ${staticPct}%, runtime ${runtimePct}%, overall ${overall}."
+} else {
+  "Executive summary: static ${staticPct}%, overall ${overall}."
+}
+
+# Prepend executive summary below H1 (convert to new array to avoid fixed-size insert)
+if ($lines.Count -ge 2) {
+  $head = $lines[0..1]
+  $tail = if ($lines.Count -gt 2) { $lines[2..($lines.Count-1)] } else { @() }
+  $lines = @($head + @($summaryLine) + $tail)
+} else {
+  $lines += $summaryLine
+}
+
+$lines += ""
+$lines += "## Scores"
+$lines += "- Static completion: $staticDone/$staticTotal ($staticPct%)"
+if ($runtimePct -ne $null) { $lines += "- Runtime probes: $runtimeOkCount/$runtimeTotal ($runtimePct%)" }
+$lines += "- Overall score: $overall"
+
 $lines | Set-Content -Encoding UTF8 -Path $reportPath
+
+# ------------------------------
+# Optional: Create/Update Issue (-DraftIssue)
+# ------------------------------
+
+if ($DraftIssue) {
+  Write-Log "DraftIssue flag detected; preparing to create/update issue."
+  $token = $env:ISSUE_TOKEN
+  if (-not $token) { $token = $env:GITHUB_TOKEN }
+  if (-not $token) { $token = $env:COPILOT_BOT_TOKEN }
+  if (-not $token) {
+    Write-Log "No token available in env (ISSUE_TOKEN/GITHUB_TOKEN/COPILOT_BOT_TOKEN). Skipping issue creation."
+  } else {
+    $repoFull = if ($env:GITHUB_REPOSITORY) { $env:GITHUB_REPOSITORY } else { 'jdamhofBBW/good-neighbor-portal' }
+    $owner,$repo = $repoFull.Split('/')
+    $api = "https://api.github.com"
+    $headers = @{ Authorization = "token $token"; 'User-Agent' = 'audit-runner'; Accept = 'application/vnd.github+json' }
+    $runUrl = $null
+    if ($env:GITHUB_SERVER_URL -and $env:GITHUB_REPOSITORY -and $env:GITHUB_RUN_ID) {
+      $runUrl = "$($env:GITHUB_SERVER_URL)/$($env:GITHUB_REPOSITORY)/actions/runs/$($env:GITHUB_RUN_ID)"
+    }
+    $title = "[Automated] Repository Audit Report"
+    $reportBody = Get-Content -Raw -Path $reportPath
+    $body = "${summaryLine}`n`nReport generated: $ts`n`n" + (if ($runUrl) { "Workflow run: $runUrl`n`n" } else { "" }) + "<details><summary>Full report</summary>\n\n```markdown\n${reportBody}\n```\n\n</details>"
+
+  # Search open issues with this title
+  $searchQuery = "repo:$repoFull in:title `"$title`" is:issue is:open"
+  $query = [uri]::EscapeDataString($searchQuery)
+    $searchUrl = "$api/search/issues?q=$query"
+    try {
+      $search = Invoke-RestMethod -Headers $headers -Method GET -Uri $searchUrl -ErrorAction Stop
+    } catch {
+      $search = $null
+    }
+    $existing = $null
+    if ($search -and $search.total_count -gt 0) { $existing = $search.items[0] }
+    if ($existing) {
+      $issueNo = $existing.number
+      $patchUrl = "$api/repos/$owner/$repo/issues/$issueNo"
+      Write-Log "Updating existing issue #$issueNo"
+      $payload = @{ body = $body } | ConvertTo-Json -Depth 5
+      Invoke-RestMethod -Headers $headers -Method PATCH -Uri $patchUrl -Body $payload -ContentType 'application/json' | Out-Null
+    } else {
+      $createUrl = "$api/repos/$owner/$repo/issues"
+      Write-Log "Creating new issue"
+      $payload = @{ title = $title; body = $body; labels = @('automation','audit') } | ConvertTo-Json -Depth 5
+      Invoke-RestMethod -Headers $headers -Method POST -Uri $createUrl -Body $payload -ContentType 'application/json' | Out-Null
+    }
+  }
+}
 
 if ($Open) {
   Write-Host "Opening $reportPath"; Start-Process $reportPath

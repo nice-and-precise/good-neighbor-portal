@@ -12,16 +12,48 @@ on:
       - 'data/**'
       - 'docs/**'
   workflow_dispatch:
+    inputs:
+      runserver:
+        description: 'Run runtime probes by starting PHP builtin server'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['false','true']
+      draftissue:
+        description: 'Create/Update a draft audit issue'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['false','true']
 
 jobs:
   audit:
     runs-on: windows-latest
+    permissions:
+      actions: read
+      contents: write
+      issues: write
     steps:
       - uses: actions/checkout@v4
-      - name: Run audit runner
+      - name: Run audit runner (push)
         shell: pwsh
+        if: github.event_name == 'push'
+        env:
+          ISSUE_TOKEN: ${{ secrets.COPILOT_BOT_TOKEN }}
         run: |
           pwsh -NoProfile -File tools/audit-runner.ps1
+      - name: Run audit runner (dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        shell: pwsh
+        env:
+          ISSUE_TOKEN: ${{ secrets.COPILOT_BOT_TOKEN }}
+        run: |
+          $runserver = '${{ inputs.runserver }}'
+          $draftissue = '${{ inputs.draftissue }}'
+          $args = @()
+          if ($runserver -eq 'true') { $args += '-RunServer' }
+          if ($draftissue -eq 'true') { $args += '-DraftIssue' }
+          pwsh -NoProfile -File tools/audit-runner.ps1 @args
       - name: Upload audit report
         uses: actions/upload-artifact@v4
         with:
