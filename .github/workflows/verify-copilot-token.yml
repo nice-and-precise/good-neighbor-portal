@@ -1,6 +1,6 @@
 name: Verify Copilot token
 
-"on":
+on:
   workflow_dispatch: {}
 
 jobs:

@@ -1,6 +1,6 @@
 name: Copilot PR helper
 
-"on":
+on:
   workflow_dispatch:
     inputs:
       branch:
