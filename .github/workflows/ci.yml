@@ -14,11 +14,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup PHP 8.1 with SQLite
+      - name: Setup PHP 8.1 with required extensions
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.1'
-          extensions: pdo_sqlite, sqlite3
+          extensions: pdo, pdo_sqlite, sqlite3, mysqlnd, redis, ds, opcache
           coverage: none
 
       - name: Migrate and seed database
@@ -28,7 +28,7 @@ jobs:
       - name: Start PHP dev server
         shell: bash
         run: |
-          php -d extension=pdo_sqlite -d extension=sqlite3 -S 127.0.0.1:8080 -t public >/dev/null 2>&1 &
+          php -S 127.0.0.1:8080 -t public >/dev/null 2>&1 &
           sleep 2
           curl -sf http://127.0.0.1:8080/api/csrf.php > /dev/null
 

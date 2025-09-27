@@ -43,7 +43,8 @@ function Resolve-Php {
 }
 $php = Resolve-Php
 $phpDir = Split-Path -Parent $php
-$extDir = Join-Path $phpDir 'ext'
+# Only compute ext dir for Windows; on Linux (CI) overriding extension_dir breaks extension loading
+$extDir = if ($IsWindows) { Join-Path $phpDir 'ext' } else { $null }
 
 # Build a tiny PHP runner to apply schema/seed
 $runner = @'
@@ -74,9 +75,22 @@ foreach ($line in $envLines) {
 $env:SEED_DEMO = $seedFlag
 $env:SCHEMA_PATH = $schemaPath
 $env:SEED_PATH = $seedPath
-& $php -d "extension_dir=$extDir" -d extension=pdo_sqlite -d extension=sqlite3 $runnerPath
+
+# Build PHP argument list safely across platforms
+$phpArgs = @()
+if ($IsWindows) {
+    if ($extDir) { $phpArgs += '-d'; $phpArgs += "extension_dir=$extDir" }
+    $phpArgs += '-d'; $phpArgs += 'extension=pdo_sqlite'
+    $phpArgs += '-d'; $phpArgs += 'extension=sqlite3'
+} else {
+    # On GitHub Actions (Linux), shivammathur/setup-php installs and enables required extensions.
+    # Do not override extension_dir; optionally ensure sqlite extensions are enabled if available.
+    $phpArgs += '-d'; $phpArgs += 'extension=pdo_sqlite'
+    $phpArgs += '-d'; $phpArgs += 'extension=sqlite3'
+}
+& $php @phpArgs $runnerPath
 if ($LASTEXITCODE -ne 0) {
-    throw "Database migration failed (PHP exit code $LASTEXITCODE). Ensure pdo_sqlite is available."
+    throw "Database migration failed (PHP exit code $LASTEXITCODE). Ensure PDO and pdo_sqlite are installed and enabled."
 }
 
 Write-Host "Database migrated and seeded: $dbPath" -ForegroundColor Green
