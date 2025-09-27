@@ -1,5 +1,5 @@
 name: Apply Branch Protection
-on:
+'on':
   # Run once when this workflow file is added/changed
   push:
     paths:
@@ -26,16 +26,18 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GH_API: https://api.github.com
-      ADMIN_TOKEN: ${{ secrets.REPO_ADMIN_TOKEN }}
     steps:
-      - name: Validate admin token
+      - name: Load admin token
+        env:
+          TOKEN: ${{ secrets.REPO_ADMIN_TOKEN }}
         shell: bash
         run: |
-          if [ -z "${ADMIN_TOKEN:-}" ]; then
+          if [ -z "${TOKEN:-}" ]; then
             echo "REPO_ADMIN_TOKEN is not set. Add it under Settings > Secrets and variables > Actions." >&2
             exit 1
           fi
-          echo "::add-mask::${ADMIN_TOKEN}"
+          echo "::add-mask::${TOKEN}"
+          echo "ADMIN_TOKEN=${TOKEN}" >> "$GITHUB_ENV"
 
       - name: Derive OWNER/REPO and target branch
         id: meta
