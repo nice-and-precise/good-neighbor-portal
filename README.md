@@ -35,3 +35,19 @@ specify check
 # Initialize spec-Driven workflow
 # In the editor chat, run the slash commands in order above.
 ```
+
+## Develop and Run (M1)
+
+```powershell
+# First-time setup: create config, migrate DB, seed demo data
+.\.specify\scripts\powershell\setup.ps1
+
+# Start local server on http://127.0.0.1:8080
+.\.specify\scripts\powershell\run.ps1 -Port 8080
+
+# If you need to reset the demo database (guarded if server is running)
+.\.specify\scripts\powershell\reset-demo.ps1
+
+# Export placeholder CSV (will be replaced in later milestone)
+.\.specify\scripts\powershell\export.ps1 -Out .\exports\route-summary.csv
+```
