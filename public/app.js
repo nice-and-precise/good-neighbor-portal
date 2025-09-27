@@ -219,6 +219,8 @@
       state.loggedIn = true;
       $('#authed').style.display = '';
       await Promise.all([loadDashboard(), loadActivity()]);
+  // Load staff queue default silently
+  try { await loadStaffQueue(); } catch {}
       // Set tenant badge
       try {
         const tns = await getJSON('/api/tenants.php');
@@ -245,6 +247,55 @@
       $('#req-status').textContent = res.error || 'Request failed';
     }
   });
+
+  // Demo pay
+  const payBtn = document.getElementById('pay-now');
+  if (payBtn) payBtn.addEventListener('click', async () => {
+    const amt = parseInt(document.getElementById('pay-amount').value, 10) || 0;
+    const method = document.getElementById('pay-method').value || 'card';
+    const res = await postJSON('/api/pay_demo.php', { amount_cents: amt, method });
+    const el = document.getElementById('pay-status');
+    if (res && res.ok) el.textContent = `Paid ${res.amount_cents}c via ${res.method} (demo).`;
+    else el.textContent = (res && res.message) || 'Payment failed (demo).';
+  });
+
+  // Staff queue
+  async function loadStaffQueue() {
+    const statusSel = document.getElementById('queue-status');
+    const keyInput = document.getElementById('queue-staff-key');
+    const listEl = document.getElementById('queue-list');
+    if (!statusSel || !keyInput || !listEl) return;
+    const status = statusSel.value;
+    const key = (keyInput.value || 'demo-staff').trim();
+    listEl.textContent = 'Loading…';
+    try {
+      const r = await fetch(`/api/staff_queue.php?status=${encodeURIComponent(status)}`, {
+        headers: { 'X-Staff-Key': key }
+      });
+      const j = await r.json();
+      if (!j.ok) { listEl.textContent = j.error || 'Queue error'; return; }
+      const items = (j.items || []).map(it => `<li><a href="#request/${it.id}">#${it.id}</a> — ${it.category} — ${it.status} — ${it.address}</li>`).join('');
+      listEl.innerHTML = `<ul style="margin:.25rem 0 0 1rem">${items || '<li>No items</li>'}</ul>`;
+    } catch (e) {
+      listEl.textContent = 'Queue load failed';
+    }
+  }
+  const qBtn = document.getElementById('queue-load');
+  if (qBtn) qBtn.addEventListener('click', () => loadStaffQueue());
+
+  // i18n toggle: persist session lang; string swap can be added later
+  const i18nEl = document.getElementById('i18n');
+  if (i18nEl) {
+    i18nEl.addEventListener('click', async (e) => {
+      const btn = e.target.closest('button[data-lang]');
+      if (!btn) return;
+      const lang = btn.getAttribute('data-lang');
+      try {
+        const res = await postJSON('/api/i18n_switch.php', { lang });
+        document.getElementById('i18n-status').textContent = res.ok ? `Language set to ${res.lang}.` : (res.error || 'Lang toggle failed');
+      } catch { document.getElementById('i18n-status').textContent = 'Lang toggle failed'; }
+    });
+  }
 
   $('#logout').addEventListener('click', async () => {
     await getJSON('/api/logout.php');

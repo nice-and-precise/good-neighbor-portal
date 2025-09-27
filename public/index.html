@@ -66,6 +66,60 @@
       </div>
       <div class="row" style="margin-top:.5rem">
         <div class="col">
+          <div id="faqs" class="card">
+            <h3 style="margin-top:0">FAQs & Announcements</h3>
+            <ul style="margin:.25rem 0 0 1rem">
+              <li>Bulk pickups run Mon–Fri. Schedule 24h in advance.</li>
+              <li>Containers: 35/65/95 gallon sizes available.</li>
+              <li>Holiday routes post on the front page each season.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="col">
+          <div id="billing-actions" class="card">
+            <h3 style="margin-top:0">Billing Actions (Demo)</h3>
+            <label>Amount (cents)
+              <input id="pay-amount" type="number" min="100" step="1" value="2500" />
+            </label>
+            <label>Method
+              <select id="pay-method"><option value="card">Card</option><option value="ach">ACH</option></select>
+            </label>
+            <button id="pay-now">Pay now (demo)</button>
+            <div id="pay-status" class="muted" style="margin-top:.5rem"></div>
+          </div>
+        </div>
+        <div class="col">
+          <div id="staff-queue" class="card">
+            <h3 style="margin-top:0">Staff Queue (Demo)</h3>
+            <label>Staff header key <input id="queue-staff-key" type="text" placeholder="demo-staff" /></label>
+            <label>Status
+              <select id="queue-status">
+                <option value="new">New</option>
+                <option value="ack">Acknowledged</option>
+                <option value="in_progress">In progress</option>
+                <option value="done">Done</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </label>
+            <button id="queue-load">Load queue</button>
+            <div id="queue-list" class="muted" style="margin-top:.5rem"></div>
+          </div>
+        </div>
+      </div>
+      <div class="row" style="margin-top:.5rem">
+        <div class="col">
+          <div id="i18n" class="card">
+            <h3 style="margin-top:0">Language</h3>
+            <button data-lang="en">English</button>
+            <button data-lang="es">Español</button>
+            <div id="i18n-status" class="muted" style="margin-top:.25rem"></div>
+          </div>
+        </div>
+        <div class="col"></div>
+        <div class="col"></div>
+      </div>
+      <div class="row" style="margin-top:.5rem">
+        <div class="col">
           <div id="detail" class="card" style="display:none"></div>
         </div>
       </div>
