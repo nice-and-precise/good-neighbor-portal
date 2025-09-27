@@ -1,0 +1,9 @@
+{
+  // Copy this folder to .vscode locally if you want fewer false-positive warnings
+  "github-actions.workflows.enableLinting": true,
+  "github-actions.workflows.validateSecrets": false,
+  "yaml.schemas": {
+    "https://json.schemastore.org/github-workflow.json": ".github/workflows/*.{yml,yaml}"
+  },
+  "yaml.validate": true
+}
