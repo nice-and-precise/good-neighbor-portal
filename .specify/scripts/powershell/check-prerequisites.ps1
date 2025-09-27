@@ -63,6 +63,9 @@ if (-not (Test-FeatureBranch -Branch $paths.CURRENT_BRANCH -HasGit:$paths.HAS_GI
     exit 1 
 }
 
+# Recompute paths in case Test-FeatureBranch adjusted SPECIFY_FEATURE
+$paths = Get-FeaturePathsEnv
+
 # If paths-only mode, output paths and exit (support combined -Json -PathsOnly)
 if ($PathsOnly) {
     if ($Json) {

@@ -34,24 +34,12 @@ function Get-CurrentBranch {
     # For non-git repos, try to find the latest feature directory
     $repoRoot = Get-RepoRoot
     $specsDir = Join-Path $repoRoot "specs"
-    
     if (Test-Path $specsDir) {
-        $latestFeature = ""
-        $highest = 0
-        
-        Get-ChildItem -Path $specsDir -Directory | ForEach-Object {
-            if ($_.Name -match '^(\d{3})-') {
-                $num = [int]$matches[1]
-                if ($num -gt $highest) {
-                    $highest = $num
-                    $latestFeature = $_.Name
-                }
-            }
-        }
-        
-        if ($latestFeature) {
-            return $latestFeature
-        }
+        $latest = Get-ChildItem -Path $specsDir -Directory |
+          Where-Object { $_.Name -match '^(\d{3})-' } |
+          Sort-Object Name -Descending |
+          Select-Object -First 1
+        if ($latest) { return $latest.Name }
     }
     
     # Final fallback
@@ -80,6 +68,17 @@ function Test-FeatureBranch {
     }
     
     if ($Branch -notmatch '^[0-9]{3}-') {
+        # Allow running on main if a specs/NNN-* directory exists and SPECIFY_FEATURE can be derived
+        $repoRoot = Get-RepoRoot
+        $specsDir = Join-Path $repoRoot 'specs'
+        if (Test-Path $specsDir) {
+            $candidate = Get-ChildItem -Path $specsDir -Directory | Where-Object { $_.Name -match '^[0-9]{3}-' } | Select-Object -First 1
+            if ($candidate) {
+                Write-Warning "[specify] Not on a feature branch ($Branch), using specs/$($candidate.Name) for context."
+                $env:SPECIFY_FEATURE = $candidate.Name
+                return $true
+            }
+        }
         Write-Output "ERROR: Not on a feature branch. Current branch: $Branch"
         Write-Output "Feature branches should be named like: 001-feature-name"
         return $false
