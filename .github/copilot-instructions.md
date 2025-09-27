@@ -1,3 +1,51 @@
+# Good Neighbor Portal - Development Workflow
+
+## Commit Strategy Decision Tree
+
+### Direct to Main ⚡ (Your Primary Mode)
+Use for rapid iteration and small changes:
+- Single endpoint additions (< 50 lines)
+- Bug fixes and validation improvements  
+- Documentation updates (README, docs/*, comments)
+- Configuration tweaks (phpstan.neon, .vscode, CI)
+- Spec Kit iterations (docs/spec.md, plan.md, tasks.md)
+- PowerShell/Bash script enhancements
+- I18n string additions
+
+**Command pattern:**
+```bash
+git add . && git commit -m "feat(billing): add CSV validation" && git push
+```
+
+### Feature Branch + PR (Substantial Changes)
+Use for multi-component features:
+- Database schema changes
+- Multi-endpoint features (like audit system)
+- UI components with API changes
+- Security modifications
+- Features spanning > 3 files significantly
+
+**Your proven pattern:**
+```bash
+git checkout -b feature/audit-system
+# develop...
+gh pr create --title "feat(audit): comprehensive audit system" --body "Adds runtime probes and GitHub integration"
+```
+
+### Emergency Override
+For broken CI or critical security:
+```bash
+git push --force-with-lease origin main
+```
+
+## Quality Gates (All Workflows)
+1. Local validation: `./tools/audit-runner.ps1` 
+2. Conventional commit with scope
+3. PHPStan passes: `./vendor/bin/phpstan analyse`
+4. Update docs if behavior changes
+
+## Scopes
+Use: `auth`, `billing`, `dashboard`, `api`, `ui`, `db`, `docs`, `ci`, `config`, `audit`, `i18n`, `staff`, `tenant`, `export`, `test`
 # Good Neighbor Portal - Copilot Development Instructions
 
 Auto-generated instructions for efficient coding agent workflow in the Good Neighbor Portal repository.
