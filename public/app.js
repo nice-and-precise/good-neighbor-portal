@@ -262,6 +262,7 @@
   });
 
   // Staff queue
+  let queueTimer = null;
   async function loadStaffQueue() {
     const statusSel = document.getElementById('queue-status');
     const keyInput = document.getElementById('queue-staff-key');
@@ -284,6 +285,16 @@
   }
   const qBtn = document.getElementById('queue-load');
   if (qBtn) qBtn.addEventListener('click', () => loadStaffQueue());
+  const qAuto = document.getElementById('queue-auto');
+  if (qAuto) qAuto.addEventListener('change', () => {
+    if (qAuto.checked) {
+      if (queueTimer) clearInterval(queueTimer);
+      queueTimer = setInterval(loadStaffQueue, 5000);
+      loadStaffQueue();
+    } else if (queueTimer) {
+      clearInterval(queueTimer); queueTimer = null;
+    }
+  });
 
   // i18n toggle: persist session lang; string swap can be added later
   const i18nEl = document.getElementById('i18n');
@@ -316,21 +327,14 @@
   }
   function t(key, fallback) { return i18n.strings[key] || fallback || key; }
   function applyI18n() {
-    const map = [
-      ['title', 'title'],
-      ['.note + section h2', 'demoLogin'],
-      ['#faqs h3', 'faqs'],
-      ['#billing-actions h3', 'billingActions'],
-      ['#i18n h3', 'language'],
-      ['.card h3', 'serviceRequest'] // first service request card title; later target by id
-    ];
     // Document title
     document.title = t('title', document.title);
-    // Apply mapped elements if they exist
-    for (const [selector, key] of map) {
-      const el = document.querySelector(selector);
-      if (el) el.textContent = t(key, el.textContent);
-    }
+    // All elements with data-i18n
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (!key) return;
+      el.textContent = t(key, el.textContent);
+    });
   }
 
   $('#logout').addEventListener('click', async () => {
