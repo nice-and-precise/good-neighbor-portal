@@ -7,10 +7,33 @@
   <style>
     body { font-family: system-ui, sans-serif; margin: 1rem; }
     .note { background:#eef; padding:.5rem; border-radius:.25rem; }
+    label { display:block; margin-top: .5rem; }
+    input, select { padding:.4rem; }
+    button { margin-top:.5rem; }
+    #authed { display:none; margin-top:1rem; }
   </style>
 </head>
 <body>
   <h1>Good Neighbor Portal</h1>
   <p class="note">Scaffold ready. Use the PowerShell scripts to setup and run the app.</p>
+  <section>
+    <h2>Demo Login</h2>
+    <label>Tenant
+      <select id="tenant"></select>
+    </label>
+    <label>Email
+      <input id="email" type="email" placeholder="you@example.com" />
+    </label>
+    <button id="request">Request magic link (demo shows token)</button>
+    <label>Token
+      <input id="token" type="text" />
+    </label>
+    <button id="verify">Verify token</button>
+    <div id="status" class="note" style="margin-top:.5rem"></div>
+    <div id="authed" class="note">
+      Logged in. <button id="logout">Logout</button>
+    </div>
+  </section>
+  <script src="/app.js"></script>
 </body>
 </html>

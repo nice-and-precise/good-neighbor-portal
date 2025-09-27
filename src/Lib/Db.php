@@ -16,6 +16,24 @@ class Db {
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         ];
+        // If using SQLite with a relative path, resolve relative to project root (two dirs up from src/Lib)
+        if (str_starts_with($dsn, 'sqlite:')) {
+            $path = substr($dsn, 7);
+            $isMemory = ($path === ':memory:' || $path === 'memory');
+            if (!$isMemory) {
+                $isAbsoluteUnix = ($path !== '' && ($path[0] === '/' || $path[0] === '\\'));
+                $isAbsoluteWin = (strlen($path) >= 2 && ((($path[0] >= 'A' && $path[0] <= 'Z') || ($path[0] >= 'a' && $path[0] <= 'z')) && $path[1] === ':'));
+                if (!$isAbsoluteUnix && !$isAbsoluteWin) {
+                    $base = dirname(__DIR__, 2); // project root
+                    $rel = ltrim($path, "./\\");
+                    $abs = $base . DIRECTORY_SEPARATOR . $rel;
+                    // Normalize to forward slashes for DSN
+                    $abs = str_replace('\\', '/', $abs);
+                    $dsn = 'sqlite:' . $abs;
+                }
+            }
+        }
+
         $this->pdo = new PDO($dsn, $user ?: null, $pass ?: null, $options);
         if (str_starts_with($dsn, 'sqlite:')) {
             $this->pdo->exec('PRAGMA foreign_keys = ON;');

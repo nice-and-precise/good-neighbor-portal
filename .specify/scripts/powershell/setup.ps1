@@ -3,7 +3,7 @@ Param(
 )
 $ErrorActionPreference = 'Stop'
 
-$root = Split-Path -Parent $MyInvocation.MyCommand.Path | Split-Path -Parent | Split-Path -Parent
+$root = Split-Path -Parent $PSScriptRoot | Split-Path -Parent | Split-Path -Parent
 Set-Location $root
 
 Write-Host "==> Setting up Good Neighbor Portal (M1)" -ForegroundColor Cyan
@@ -20,7 +20,9 @@ if (-not (Test-Path $appEnv)) {
 # Create SQLite DB
 $dataDir = Join-Path $root 'data'
 $dbPath = Join-Path $dataDir 'app.db'
-## Paths (schema/seed constants are used by the PHP runner)
+# Resolve SQL file paths used by the runner
+$schemaPath = Join-Path $dataDir 'schema.sql'
+$seedPath = Join-Path $dataDir 'seed.sql'
 
 if (Test-Path $dbPath) {
     if ($Force) {
@@ -31,10 +33,17 @@ if (Test-Path $dbPath) {
 }
 
 # Use PHP to execute schema and seed against SQLite
-$php = 'php'
-if (-not (Get-Command $php -ErrorAction SilentlyContinue)) {
+function Resolve-Php {
+    if (Get-Command 'php' -ErrorAction SilentlyContinue) { return (Get-Command 'php').Source }
+    $wingetDir = Join-Path $env:LOCALAPPDATA 'Microsoft\WinGet\Packages'
+    $candidate = Get-ChildItem -Path $wingetDir -Recurse -Filter php.exe -ErrorAction SilentlyContinue |
+        Select-Object -First 1 -ExpandProperty FullName
+    if ($candidate) { return $candidate }
     throw "PHP is not installed or not in PATH. Please install PHP 8.1+ and retry."
 }
+$php = Resolve-Php
+$phpDir = Split-Path -Parent $php
+$extDir = Join-Path $phpDir 'ext'
 
 # Build a tiny PHP runner to apply schema/seed
 $runner = @'
@@ -42,9 +51,11 @@ $runner = @'
 $dsn = 'sqlite:./data/app.db';
 $db = new PDO($dsn);
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-$db->exec(file_get_contents('./data/schema.sql'));
+$schema = getenv('SCHEMA_PATH') ?: './data/schema.sql';
+$db->exec(file_get_contents($schema));
 if (getenv('SEED_DEMO') === 'true') {
-    $db->exec(file_get_contents('./data/seed.sql'));
+    $seed = getenv('SEED_PATH') ?: './data/seed.sql';
+    $db->exec(file_get_contents($seed));
 }
 ?>
 '@
@@ -61,7 +72,12 @@ foreach ($line in $envLines) {
 }
 
 $env:SEED_DEMO = $seedFlag
-& $php $runnerPath
+$env:SCHEMA_PATH = $schemaPath
+$env:SEED_PATH = $seedPath
+& $php -d "extension_dir=$extDir" -d extension=pdo_sqlite -d extension=sqlite3 $runnerPath
+if ($LASTEXITCODE -ne 0) {
+    throw "Database migration failed (PHP exit code $LASTEXITCODE). Ensure pdo_sqlite is available."
+}
 
 Write-Host "Database migrated and seeded: $dbPath" -ForegroundColor Green
 Write-Host "Setup complete." -ForegroundColor Green

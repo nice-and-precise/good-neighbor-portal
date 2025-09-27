@@ -3,7 +3,7 @@ Param(
     [switch]$Force
 )
 $ErrorActionPreference = 'Stop'
-$root = Split-Path -Parent $MyInvocation.MyCommand.Path | Split-Path -Parent | Split-Path -Parent
+$root = Split-Path -Parent $PSScriptRoot | Split-Path -Parent | Split-Path -Parent
 Set-Location $root
 
 function Test-PortInUse([int]$P) {
