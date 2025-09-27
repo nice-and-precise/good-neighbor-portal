@@ -8,6 +8,8 @@ Reference: docs/plan.md, docs/spec.md, docs/decisions.md
 - Implement data/schema.sql and data/seed.sql (Willmar, MN demo data)
 - Implement src/Lib/{Db.php,Config.php,Validator.php,Util.php}
 - Add scripts/setup.ps1, scripts/run.ps1, scripts/reset-demo.ps1, scripts/export.ps1
+- Reset guard: in reset-demo.ps1, detect if PHP server is running on :8080 (port/process check). If active, abort with clear message.
+- Optional (parity): add bash equivalents for setup/run/reset/export in scripts/bash/ (can be deferred if Windows-only MVP)
 
 ## M2: Auth + Neighborhood Switcher
 - Models: UserModel.php, MagicLinkModel.php, NeighborhoodModel.php
@@ -21,6 +23,7 @@ Reference: docs/plan.md, docs/spec.md, docs/decisions.md
 - Controllers: ResidentController.php
 - Views: resident_dashboard.php (next pickup, calendar), resident_billing.php (history, demo pay)
 - Deterministic pay endpoint; sandbox messaging
+- Add FAQs/announcements static section/page (FR-005) linked from dashboard
 
 ## M4: Service Requests + Confirmations
 - Model: RequestModel.php
@@ -32,6 +35,7 @@ Reference: docs/plan.md, docs/spec.md, docs/decisions.md
 - Views: staff_queue.php, staff_dashboard.php (recent activity)
 - Polling JS (~5s) for queue refresh
 - Status update + notes endpoint
+- Security: add CSRF token on forms + validate in POST handlers; add sanitized error logging to file (no PII)
 
 ## M6: Route Summary + CSV Export
 - Model: RouteModel.php
@@ -42,6 +46,7 @@ Reference: docs/plan.md, docs/spec.md, docs/decisions.md
 - i18n/en.json, i18n/es.json; Lib/I18n.php; toggle endpoint and JS
 - tests/smoke.ps1: full flow
 - tests/unit/validator_test.php
+- A11y & Mobile: sweep for labels, contrast, keyboard nav, skip links; verify responsive at common breakpoints (mobile/desktop). Capture a quick checklist in docs or README.
 
 ## Acceptance Checklists
 - Validate FR-001..FR-014 via manual smoke + scripts
