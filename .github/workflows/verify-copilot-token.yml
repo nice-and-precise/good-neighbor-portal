@@ -1,7 +1,7 @@
 name: Verify Copilot token
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
 
 jobs:
   whoami:
