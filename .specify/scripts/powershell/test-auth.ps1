@@ -45,6 +45,12 @@ $dash2 = (Invoke-WebRequest -UseBasicParsing -Uri "$Base/api/dashboard.php" -Web
 if (-not $dash2.ok -or -not $dash2.last_request) { throw 'dashboard last_request missing' }
 Write-Host "Request OK: id=$($rc.id) last_request=$($dash2.last_request.category) ($($dash2.last_request.status))" -ForegroundColor Green
 
+# Request detail
+$reqDetail = (Invoke-WebRequest -UseBasicParsing -Uri "$Base/api/request_get.php?id=$($rc.id)" -WebSession $session).Content | ConvertFrom-Json
+if (-not $reqDetail.ok) { throw 'request_get failed' }
+if (-not $reqDetail.request -or $reqDetail.request.id -ne $rc.id) { throw 'request_get returned wrong id' }
+Write-Host "Request detail OK: address='$($reqDetail.request.address)' status=$($reqDetail.request.status)" -ForegroundColor Green
+
 # Recent activity
 $act = (Invoke-WebRequest -UseBasicParsing -Uri "$Base/api/recent_activity.php" -WebSession $session).Content | ConvertFrom-Json
 if (-not $act.ok -or $act.items.Count -lt 1) { throw 'recent_activity failed' }

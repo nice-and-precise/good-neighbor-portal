@@ -27,6 +27,69 @@
     }
   }
 
+  // Simple hash router for request and billing details
+  async function route() {
+    const el = document.getElementById('detail');
+    if (!el) return;
+    const h = location.hash || '';
+    const mReq = h.match(/^#request\/(\d+)$/);
+    const mBill = h.match(/^#billing\/(\d+)$/);
+    if (mReq) {
+      const id = mReq[1];
+      try {
+        const r = await getJSON(`/api/request_get.php?id=${id}`);
+        if (r.ok) {
+          const o = r.request;
+          el.style.display = '';
+          el.innerHTML = `
+            <h3 style="margin-top:0">Request #${o.id}</h3>
+            <div><strong>Category:</strong> ${o.category}</div>
+            <div><strong>Status:</strong> ${o.status}</div>
+            <div><strong>Address:</strong> ${o.address}</div>
+            <div><strong>Created:</strong> ${o.created_at}</div>
+            <div><strong>Updated:</strong> ${o.updated_at || '—'}</div>
+            <div style="margin-top:.5rem"><em>${o.description || ''}</em></div>
+          `;
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+          el.style.display = '';
+          el.textContent = 'Request not found';
+        }
+      } catch {
+        el.style.display = '';
+        el.textContent = 'Request error';
+      }
+      return;
+    }
+    if (mBill) {
+      const id = mBill[1];
+      try {
+        const r = await getJSON(`/api/billing_get.php?id=${id}`);
+        if (r.ok) {
+          const b = r.charge; const money = (c)=>`$${(c/100).toFixed(2)}`;
+          el.style.display = '';
+          el.innerHTML = `
+            <h3 style="margin-top:0">Charge #${b.id}</h3>
+            <div><strong>Date:</strong> ${b.created_at}</div>
+            <div><strong>Amount:</strong> ${money(b.amount_cents)}</div>
+            <div style="margin-top:.5rem"><em>${b.description || ''}</em></div>
+          `;
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+          el.style.display = '';
+          el.textContent = 'Charge not found';
+        }
+      } catch {
+        el.style.display = '';
+        el.textContent = 'Charge error';
+      }
+      return;
+    }
+    // No route
+    el.style.display = 'none';
+    el.innerHTML = '';
+  }
+
   $('#request').addEventListener('click', async () => {
     const email = $('#email').value.trim();
     const tenant = $('#tenant').value;
@@ -53,6 +116,8 @@
       } catch {}
       const anchor = document.getElementById('dashboard-anchor');
       if (anchor) { anchor.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+      // Attempt to load detail route if present
+      route();
     }
   });
   $('#req-submit').addEventListener('click', async () => {
@@ -62,6 +127,8 @@
     if (res.ok) {
       $('#req-status').textContent = `Submitted request #${res.id} (status: ${res.status})`;
       await Promise.all([loadDashboard(), loadActivity()]);
+      location.hash = `#request/${res.id}`;
+      route();
     } else {
       $('#req-status').textContent = res.error || 'Request failed';
     }
@@ -78,6 +145,8 @@
   } else {
     init();
   }
+
+  window.addEventListener('hashchange', route);
 
   async function loadDashboard() {
     try {
@@ -116,4 +185,6 @@
       `;
     } catch { $('#activity').textContent = 'Activity error.'; }
   }
+  // Try to route on initial load (will only show after login)
+  route();
 })();
