@@ -1,0 +1,60 @@
+name: Release
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/release-requests/**'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Find release requests
+        id: find
+        run: |
+          tags=$(ls .github/release-requests || true)
+          echo "tags=$tags" >> $GITHUB_OUTPUT
+
+      - name: Create releases
+        if: steps.find.outputs.tags != ''
+        shell: bash
+        env:
+          TAGS: ${{ steps.find.outputs.tags }}
+        run: |
+          set -euo pipefail
+          for tag in $TAGS; do
+            echo "Preparing release for tag: $tag"
+            # Try to extract section from CHANGELOG matching [M3.1] style for tag m3.1
+            label=$(echo "$tag" | tr '[:lower:]' '[:upper:]')
+            notes=$(awk -v lbl="## [${label}]" '
+              $0 ~ lbl {flag=1; next} 
+              /^## \[/ && flag {flag=0} 
+              flag {print}
+            ' CHANGELOG.md)
+            if [ -z "$notes" ]; then
+              # Fallback to docs/releases/<tag>.md if present
+              if [ -f "docs/releases/${tag}.md" ]; then
+                notes=$(cat "docs/releases/${tag}.md")
+              else
+                notes="Release ${tag}"
+              fi
+            fi
+            notes_file="/tmp/release_${tag}.md"
+            printf "%s" "$notes" > "$notes_file"
+
+            gh api \
+              --method POST \
+              -H "Accept: application/vnd.github+json" \
+              "/repos/${{ github.repository }}/releases" \
+              -f tag_name="$tag" \
+              -f name="$tag" \
+              -F body=@"$notes_file" \
+              -f draft=false \
+              -f generate_release_notes=false || echo "Release may already exist for $tag"
+          done
