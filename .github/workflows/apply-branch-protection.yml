@@ -11,15 +11,6 @@ on:
         description: "Branch to protect"
         required: false
         default: "main"
-      required_checks:
-        description: "Comma-separated list of required status check names (overrides auto-detect)"
-        required: false
-        default: ""
-      fail_on_unsupported:
-        description: "Fail the job if branch protection cannot be applied due to plan limitations"
-        required: false
-        default: "false"
-
 permissions:
   contents: read
   actions: read
