@@ -16,10 +16,14 @@ on:
 jobs:
   branch_and_pr:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
         with:
-          persist-credentials: false
+          # Keep credentials so git fetch/push can authenticate (uses GITHUB_TOKEN by default)
+          persist-credentials: true
 
       - name: Configure git identity
         run: |
@@ -38,24 +42,24 @@ jobs:
           git checkout -B "$BRANCH" "origin/$BASE"
           git commit --allow-empty -m "chore: copilot automated commit"
 
-      - name: Push branch using COPILOT_BOT_TOKEN
-        env:
-          TOKEN: ${{ secrets.COPILOT_BOT_TOKEN }}
+      - name: Push branch (use COPILOT_BOT_TOKEN, fallback to GITHUB_TOKEN)
         run: |
           set -e
           REPO="${{ github.repository }}"
           BRANCH="${{ github.event.inputs.branch }}"
+          TOKEN="${{ secrets.COPILOT_BOT_TOKEN }}"
+          if [ -z "$TOKEN" ]; then TOKEN="${{ secrets.GITHUB_TOKEN }}"; fi
           echo "Pushing to $REPO on branch $BRANCH"
           git push "https://x-access-token:${TOKEN}@github.com/${REPO}.git" HEAD:"$BRANCH"
 
       - name: Open pull request
-        env:
-          GH_TOKEN: ${{ secrets.COPILOT_BOT_TOKEN }}
         run: |
           set -e
           BASE="${{ github.event.repository.default_branch }}"
           if [ -z "$BASE" ]; then BASE="main"; fi
           echo "Opening PR against base: $BASE"
+          GH_TOKEN="${{ secrets.COPILOT_BOT_TOKEN }}"
+          if [ -z "$GH_TOKEN" ]; then GH_TOKEN="${{ secrets.GITHUB_TOKEN }}"; fi
           DATA=$(jq -n --arg title "${{ github.event.inputs.title }}" \
                        --arg head  "${{ github.event.inputs.branch }}" \
                        --arg base  "$BASE" \
