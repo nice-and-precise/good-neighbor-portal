@@ -43,11 +43,11 @@
         // Keep description immutable for now
       } else {
         el.style.display = '';
-        el.textContent = 'Request not found';
+        el.textContent = t('requestNotFound', 'Request not found');
       }
     } catch {
       el.style.display = '';
-      el.textContent = 'Request error';
+      el.textContent = t('requestError', 'Request error');
     }
   }
 
@@ -58,12 +58,12 @@
       const r = await getJSON(`/api/request_notes.php?request_id=${id}`);
       if (r.ok) {
         const items = (r.notes || []).map(n => `<li><strong>${n.staff_name || 'Staff'}</strong> — <span class="muted">${n.created_at}</span><br/>${escapeHtml(n.note)}</li>`).join('');
-        notesEl.innerHTML = `<ul style="margin:.25rem 0 0 1rem">${items || '<li>No notes yet</li>'}</ul>`;
+        notesEl.innerHTML = `<ul style="margin:.25rem 0 0 1rem">${items || `<li>${t('noNotesYet','No notes yet')}</li>`}</ul>`;
       } else {
-        notesEl.textContent = 'Notes unavailable';
+        notesEl.textContent = t('notesUnavailable', 'Notes unavailable');
       }
     } catch {
-      notesEl.textContent = 'Notes error';
+      notesEl.textContent = t('notesError', 'Notes error');
     }
   }
 
@@ -97,32 +97,32 @@
           const o = r.request;
           el.style.display = '';
           el.innerHTML = `
-            <a href="#" id="back-link" style="text-decoration:none">← Back</a>
+            <a href="#" id="back-link" style="text-decoration:none">&larr; ${t('back','Back')}</a>
             <h3 style="margin:.25rem 0 0">Request #${o.id}</h3>
-            <div><strong>Category:</strong> ${o.category}</div>
-            <div><strong>Status:</strong> <span id="detail-status">${o.status}</span></div>
-            <div><strong>Address:</strong> ${o.address}</div>
-            <div><strong>Created:</strong> ${o.created_at}</div>
-            <div><strong>Updated:</strong> <span id="detail-updated">${o.updated_at || '—'}</span></div>
+            <div><strong>${t('categoryLabel','Category')}:</strong> ${o.category}</div>
+            <div><strong>${t('statusLabel','Status')}:</strong> <span id="detail-status">${o.status}</span></div>
+            <div><strong>${t('addressLabel','Address')}:</strong> ${o.address}</div>
+            <div><strong>${t('createdLabel','Created')}:</strong> ${o.created_at}</div>
+            <div><strong>${t('updatedLabel','Updated')}:</strong> <span id="detail-updated">${o.updated_at || '—'}</span></div>
             <div style="margin-top:.5rem"><em>${o.description || ''}</em></div>
             <hr/>
             <div>
-              <h4 style="margin:.25rem 0">Staff controls (demo)</h4>
-              <label>Staff header key <input id="staff-key" type="text" placeholder="demo-staff" style="margin-left:.25rem"/></label>
+              <h4 style="margin:.25rem 0">${t('staffControlsDemo','Staff controls (demo)')}</h4>
+              <label>${t('staffHeaderKey','Staff header key')} <input id="staff-key" type="text" placeholder="demo-staff" style="margin-left:.25rem"/></label>
               <div style="margin-top:.5rem; display:flex; gap:.5rem; flex-wrap:wrap">
-                <button data-action="ack">Mark Acknowledged</button>
-                <button data-action="in_progress">Start Work</button>
-                <button data-action="done">Mark Done</button>
-                <button data-action="cancelled">Cancel</button>
+                <button data-action="ack">${t('markAcknowledged','Mark Acknowledged')}</button>
+                <button data-action="in_progress">${t('startWork','Start Work')}</button>
+                <button data-action="done">${t('markDone','Mark Done')}</button>
+                <button data-action="cancelled">${t('cancel','Cancel')}</button>
               </div>
               <div style="margin-top:.5rem">
-                <input id="note-text" type="text" placeholder="Add staff note..." style="width:70%"/>
-                <button id="note-add">Add Note</button>
+                <input id="note-text" type="text" placeholder="${t('addStaffNotePlaceholder','Add staff note...')}" style="width:70%"/>
+                <button id="note-add">${t('addNote','Add Note')}</button>
                 <div id="note-status" class="muted" style="margin-top:.25rem"></div>
               </div>
             </div>
             <div style="margin-top:.75rem">
-              <h4 style="margin:.25rem 0">Notes</h4>
+              <h4 style="margin:.25rem 0">${t('notesHeading','Notes')}</h4>
               <div id="notes" class="card" style="background:#f9f9ff"></div>
             </div>
           `;
@@ -141,20 +141,21 @@
             b.disabled = false;
             if (res.ok) {
               await loadRequestDetail(id);
+              showToast(t('statusUpdated','Request status updated.'), 'success');
             } else {
-              alert(res.error || 'Status update failed');
+              showToast(res.error || t('statusUpdateFailed','Status update failed'), 'error');
             }
           }));
           const addBtn = document.getElementById('note-add');
           if (addBtn) addBtn.addEventListener('click', async () => {
             const note = (noteInput && noteInput.value.trim()) || '';
             const k = (keyInput && keyInput.value.trim()) || 'demo-staff';
-            if (!note) { noteStatus.textContent = 'Enter a note first.'; return; }
+            if (!note) { noteStatus.textContent = t('enterNoteFirst','Enter a note first.'); return; }
             addBtn.disabled = true;
             const res = await postJSON('/api/request_note_create.php', { request_id: Number(id), note }, { 'X-Staff-Key': k });
             addBtn.disabled = false;
-            if (res.ok) { noteInput.value = ''; noteStatus.textContent = 'Note added.'; await loadRequestNotes(id); }
-            else { noteStatus.textContent = res.error || 'Note failed'; }
+            if (res.ok) { noteInput.value = ''; noteStatus.textContent = t('noteAdded','Note added.'); showToast(t('noteAdded','Note added.'), 'success'); await loadRequestNotes(id); }
+            else { noteStatus.textContent = res.error || t('noteFailed','Note failed'); showToast(res.error || t('noteFailed','Note failed'), 'error'); }
           });
           // Initial loads and polling
           await loadRequestNotes(id);
@@ -163,11 +164,11 @@
           el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         } else {
           el.style.display = '';
-          el.textContent = 'Request not found';
+          el.textContent = t('requestNotFound', 'Request not found');
         }
       } catch {
         el.style.display = '';
-        el.textContent = 'Request error';
+        el.textContent = t('requestError', 'Request error');
       }
       return;
     }
@@ -182,18 +183,18 @@
           el.style.display = '';
           el.innerHTML = `
             <h3 style="margin-top:0">Charge #${b.id}</h3>
-            <div><strong>Date:</strong> ${b.created_at}</div>
-            <div><strong>Amount:</strong> ${money(b.amount_cents)}</div>
+            <div><strong>${t('dateLabel','Date')}:</strong> ${b.created_at}</div>
+            <div><strong>${t('amountLabel','Amount')}:</strong> ${money(b.amount_cents)}</div>
             <div style="margin-top:.5rem"><em>${b.description || ''}</em></div>
           `;
           el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         } else {
           el.style.display = '';
-          el.textContent = 'Charge not found';
+          el.textContent = t('chargeNotFound','Charge not found');
         }
       } catch {
         el.style.display = '';
-        el.textContent = 'Charge error';
+        el.textContent = t('chargeError','Charge error');
       }
       return;
     }
@@ -242,11 +243,13 @@
     const res = await postJSON('/api/request_create.php', { category, description });
     if (res.ok) {
       $('#req-status').textContent = `Submitted request #${res.id} (status: ${res.status})`;
+      showToast(t('requestCreated','Request submitted.'), 'success');
       await Promise.all([loadDashboard(), loadActivity()]);
       location.hash = `#request/${res.id}`;
       route();
     } else {
-      $('#req-status').textContent = res.error || 'Request failed';
+      $('#req-status').textContent = res.error || t('requestFailed','Request failed');
+      showToast(res.error || t('requestFailed','Request failed'), 'error');
     }
   });
 
@@ -381,24 +384,24 @@
   async function loadDashboard() {
     try {
       const d = await getJSON('/api/dashboard.php');
-      if (!d.ok) { $('#dashboard').textContent = 'Dashboard unavailable.'; return; }
+      if (!d.ok) { $('#dashboard').textContent = t('dashboardUnavailable','Dashboard unavailable.'); return; }
       const money = (c) => `$${(c/100).toFixed(2)}`;
       const bills = d.billing.map(b => `<li>${b.created_at}: ${b.description} <strong>${money(b.amount_cents)}</strong></li>`).join('');
-      const lastReq = d.last_request ? `${d.last_request.created_at} — ${d.last_request.category} (${d.last_request.status})` : 'None';
+      const lastReq = d.last_request ? `${d.last_request.created_at} — ${d.last_request.category} (${d.last_request.status})` : t('none','None');
       $('#dashboard').innerHTML = `
-        <h3 style="margin-top:0">Resident Dashboard</h3>
-        <div><strong>Next pickup:</strong> ${d.next_pickup_date}</div>
-        <div style=\"margin-top:.5rem\"><strong>Last request:</strong> ${lastReq}</div>
-        <div style="margin-top:.5rem"><strong>Billing</strong></div>
-        <ul style="margin:.25rem 0 0 1rem">${bills || '<li>No charges</li>'}</ul>
+        <h3 style="margin-top:0">${t('residentDashboard','Resident Dashboard')}</h3>
+        <div><strong>${t('nextPickup','Next pickup')}:</strong> ${d.next_pickup_date}</div>
+        <div style=\"margin-top:.5rem\"><strong>${t('lastRequest','Last request')}:</strong> ${lastReq}</div>
+        <div style="margin-top:.5rem"><strong>${t('billingHeading','Billing')}</strong></div>
+        <ul style="margin:.25rem 0 0 1rem">${bills || `<li>${t('noCharges','No charges')}</li>`}</ul>
       `;
-    } catch { $('#dashboard').textContent = 'Dashboard error.'; }
+    } catch { $('#dashboard').textContent = t('dashboardError','Dashboard error.'); }
   }
 
   async function loadActivity() {
     try {
       const r = await getJSON('/api/recent_activity.php');
-      if (!r.ok) { $('#activity').textContent = 'Activity unavailable.'; return; }
+      if (!r.ok) { $('#activity').textContent = t('activityUnavailable','Activity unavailable.'); return; }
       const money = (c) => `$${(c/100).toFixed(2)}`;
       const current = location.hash || '';
       const items = r.items.map(it => {
@@ -413,10 +416,10 @@
         }
       }).join('');
       $('#activity').innerHTML = `
-        <h3 style="margin-top:0">Recent Activity</h3>
-        <ul style="margin:.25rem 0 0 1rem">${items || '<li>Nothing yet</li>'}</ul>
+        <h3 style="margin-top:0">${t('recentActivity','Recent Activity')}</h3>
+        <ul style="margin:.25rem 0 0 1rem">${items || `<li>${t('activityEmpty','Nothing yet')}</li>`}</ul>
       `;
-    } catch { $('#activity').textContent = 'Activity error.'; }
+    } catch { $('#activity').textContent = t('activityError','Activity error.'); }
   }
   // Try to route on initial load (will only show after login)
   route();

@@ -51,6 +51,10 @@ jobs:
         shell: pwsh
         run: .\tests\smoke.ps1 -BaseUrl http://127.0.0.1:8080 -Email ci@example.com -Tenant willmar-mn
 
+      - name: Unit test - pay demo deterministic behavior
+        shell: pwsh
+        run: .\tests\pay-deterministic.ps1 -BaseUrl http://127.0.0.1:8080 -Email ci@example.com -Tenant willmar-mn
+
       - name: Unit tests - Validator
         shell: bash
         run: php tests/unit/validator_test.php
