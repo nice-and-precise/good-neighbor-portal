@@ -1,14 +1,33 @@
 {
-  // Keep GitHub Actions linting, but don't warn about unknown/missing secrets locally
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/node_modules": true,
+    "**/.playwright-mcp": true,
+    "data/*.db*": false
+  },
+  "files.associations": {
+    "*.ps1": "powershell",
+    "*.php": "php",
+    "*.json": "json"
+  },
+  "editor.formatOnSave": false,
+  "editor.tabSize": 2,
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+  "php.validate.enable": true,
+  "php.validate.executablePath": null,
+  "intelephense.environment.phpVersion": "8.1",
+  "intelephense.files.associations": ["**/*.php"],
+  "powershell.integratedConsole.showOnStartup": false,
+  "powershell.scriptAnalysis.enable": false,
+  "playwright.env": {
+    "BASE_URL": "http://127.0.0.1:8080"
+  },
   "github-actions.workflows.enableLinting": true,
   "github-actions.workflows.validateSecrets": false,
   "github-actions.workflows.validateContextAccess": false,
-
-  // Ensure YAML uses the GitHub Actions workflow schema for better diagnostics
   "yaml.schemas": {
     "https://json.schemastore.org/github-workflow.json": ".github/workflows/*.{yml,yaml}"
   },
-
-  // General YAML validation stays on
   "yaml.validate": true
 }

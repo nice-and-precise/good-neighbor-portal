@@ -60,6 +60,27 @@ specify check
 .\.specify\scripts\powershell\test-auth.ps1 -Email resident@example.com
 ```
 
+## VS Code Quickstart
+
+- Recommended extensions are auto-suggested on open (Copilot, PowerShell, Intelephense, PHP Debug, Playwright)
+- Useful tasks (Terminal → Run Task...):
+	- Spec: Setup project
+	- App: Run server (8080)
+	- Tests: Smoke
+	- Tests: Pay deterministic
+
+Workspace tips:
+- Default terminal profile is PowerShell on Windows.
+- YAML validation is enabled for GitHub Actions.
+- Intelephense is configured for PHP 8.1 syntax.
+
+## PR Workflow
+
+- Use feature branches for each change, open PRs to `main`.
+- PRs should update `docs/spec.md`, `docs/plan.md`, and/or `docs/tasks.md` when behavior changes.
+- CI must pass (E2E, negative, smoke, unit tests; PHP 8.1/8.2 matrix).
+- See `CONTRIBUTING.md` for quality gates and milestone strategy.
+
 ### Demo Auth Flow (M2)
 
 - Open http://127.0.0.1:8080

@@ -1,0 +1,43 @@
+{
+  "$schema": "vscode://schemas/tasks",
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Spec: Setup project",
+      "type": "shell",
+      "command": "pwsh",
+      "args": ["-NoProfile","-ExecutionPolicy","Bypass","-File",".specify/scripts/powershell/setup.ps1"],
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "App: Run server (8080)",
+      "type": "shell",
+      "command": "pwsh",
+      "args": ["-NoProfile","-ExecutionPolicy","Bypass","-File",".specify/scripts/powershell/run.ps1","-Port","8080"],
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Tests: Smoke",
+      "type": "shell",
+      "command": "pwsh",
+      "args": ["-NoProfile","-ExecutionPolicy","Bypass","-File","tests/smoke.ps1","-BaseUrl","http://127.0.0.1:8080","-Email","resident@example.com","-Tenant","willmar-mn"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Tests: Pay deterministic",
+      "type": "shell",
+      "command": "pwsh",
+      "args": ["-NoProfile","-ExecutionPolicy","Bypass","-File","tests/pay-deterministic.ps1","-BaseUrl","http://127.0.0.1:8080","-Email","resident@example.com","-Tenant","willmar-mn"],
+      "problemMatcher": []
+    },
+    {
+      "label": "SpecKit: /specify",
+      "type": "shell",
+      "command": "specify",
+      "args": ["--help"],
+      "detail": "Run Spec Kit commands via Copilot Chat: /constitution, /specify, /clarify, /plan, /tasks, /analyze, /implement"
+    }
+  ]
+}
