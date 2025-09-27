@@ -5,7 +5,13 @@
     "ms-vscode.powershell",
     "bmewburn.vscode-intelephense-client",
     "xdebug.php-debug",
-    "ms-playwright.playwright"
+    "ms-playwright.playwright",
+    "mtxr.sqltools",
+    "mtxr.sqltools-driver-sqlite",
+    "alexcvzz.vscode-sqlite",
+    "davidanson.vscode-markdownlint",
+    "yzhang.markdown-all-in-one",
+    "ikappas.phpcs"
   ],
   "unwantedRecommendations": []
 }
