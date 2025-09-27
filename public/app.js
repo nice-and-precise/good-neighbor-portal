@@ -63,8 +63,13 @@
       const d = await getJSON('/api/dashboard.php');
       if (!d.ok) { $('#dashboard').textContent = 'Dashboard unavailable.'; return; }
       const money = (c) => `$${(c/100).toFixed(2)}`;
-      const bills = d.billing.map(b => `- ${b.created_at}: ${b.description} (${money(b.amount_cents)})`).join('\n');
-      $('#dashboard').textContent = `Next pickup: ${d.next_pickup_date}\nBilling:\n${bills || 'No charges'}`;
+      const bills = d.billing.map(b => `<li>${b.created_at}: ${b.description} <strong>${money(b.amount_cents)}</strong></li>`).join('');
+      $('#dashboard').innerHTML = `
+        <h3 style="margin-top:0">Resident Dashboard</h3>
+        <div><strong>Next pickup:</strong> ${d.next_pickup_date}</div>
+        <div style="margin-top:.5rem"><strong>Billing</strong></div>
+        <ul style="margin:.25rem 0 0 1rem">${bills || '<li>No charges</li>'}</ul>
+      `;
     } catch { $('#dashboard').textContent = 'Dashboard error.'; }
   }
 })();

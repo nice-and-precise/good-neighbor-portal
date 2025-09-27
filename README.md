@@ -81,3 +81,8 @@ specify check
 - `POST /api/auth_verify.php` → verifies token and binds session
 - `GET /api/session.php` → current session
 - `GET /api/logout.php` → clears session
+
+### Resident Dashboard (M3 start)
+
+- `GET /api/dashboard.php` → profile, next_pickup_date, billing for the logged-in user
+- New users created via `auth_request` get seeded demo billing charges automatically

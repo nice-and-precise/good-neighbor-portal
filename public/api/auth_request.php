@@ -31,10 +31,29 @@ if (!$tenantId) { $pdo->rollBack(); Util::json(['ok' => false, 'error' => 'tenan
 $stmt = $pdo->prepare('SELECT id FROM users WHERE tenant_id = ? AND email = ? LIMIT 1');
 $stmt->execute([$tenantId, $who]);
 $userId = (int)($stmt->fetchColumn() ?: 0);
+$isNew = false;
 if (!$userId) {
+  // Role hardcoded to resident for demo
   $ins = $pdo->prepare('INSERT INTO users (tenant_id, role, email, display_name) VALUES (?,"resident",?,?)');
   $ins->execute([$tenantId, $who, $who]);
   $userId = (int)$pdo->lastInsertId();
+  $isNew = true;
+}
+
+// Seed demo billing for new users (add a few charges once)
+if ($isNew) {
+  $checkStmt = $pdo->prepare('SELECT COUNT(1) FROM billing_charges WHERE tenant_id = ? AND resident_id = ?');
+  $checkStmt->execute([$tenantId, $userId]);
+  $hasCharges = (int)$checkStmt->fetchColumn();
+  if ($hasCharges === 0) {
+    $charges = [
+      [2500, 'Quarterly dues'],
+      [1899, 'Overage fee'],
+      [3200, 'Container swap fee'],
+    ];
+    $ci = $pdo->prepare('INSERT INTO billing_charges (tenant_id, resident_id, amount_cents, description) VALUES (?,?,?,?)');
+    foreach ($charges as $c) { $ci->execute([$tenantId, $userId, $c[0], $c[1]]); }
+  }
 }
 
 $token = bin2hex(random_bytes(16));
