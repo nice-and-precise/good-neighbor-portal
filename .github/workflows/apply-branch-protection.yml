@@ -15,6 +15,10 @@ name: Apply Branch Protection
         description: "Comma-separated list of required status check names (overrides auto-detect)"
         required: false
         default: ""
+      fail_on_unsupported:
+        description: "Fail the job if branch protection cannot be applied due to plan limitations"
+        required: false
+        default: "false"
 
 permissions:
   contents: read
@@ -172,6 +176,27 @@ jobs:
             "$GH_API/repos/$OWNER/$REPO/branches/$BRANCH/protection" \
             --data "$BODY")
           if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
+            MSG=$(jq -r '.message // ""' /tmp/protect_resp.json 2>/dev/null || true)
+            if [ "$HTTP_CODE" = "403" ] && echo "$MSG" | grep -qi 'Upgrade to GitHub Pro or make this repository public'; then
+              echo "applied=false" >> "$GITHUB_OUTPUT"
+              echo "unsupported=true" >> "$GITHUB_OUTPUT"
+              echo "Branch protection cannot be applied due to plan limitations." >> "$GITHUB_STEP_SUMMARY"
+              echo "" >> "$GITHUB_STEP_SUMMARY"
+              echo "Repository: $OWNER/$REPO" >> "$GITHUB_STEP_SUMMARY"
+              echo "Branch: $BRANCH" >> "$GITHUB_STEP_SUMMARY"
+              echo "API message: $MSG" >> "$GITHUB_STEP_SUMMARY"
+              echo "Options: Make the repository public or upgrade to GitHub Pro/Team to enable branch protection on private repositories." >> "$GITHUB_STEP_SUMMARY"
+              FAIL_INPUT='${{ github.event.inputs.fail_on_unsupported }}'
+              FAIL_INPUT_LC=$(echo "${FAIL_INPUT:-false}" | tr '[:upper:]' '[:lower:]')
+              if [ "$FAIL_INPUT_LC" = "true" ]; then
+                echo "Failing because fail_on_unsupported=true" >&2
+                cat /tmp/protect_resp.json >&2
+                exit 1
+              else
+                echo "Continuing without enforcement due to plan limitation." >&2
+                exit 0
+              fi
+            fi
             echo "Failed to apply protection (HTTP $HTTP_CODE). Response body:" >&2
             cat /tmp/protect_resp.json >&2
             exit 1
@@ -204,3 +229,14 @@ jobs:
             },
             required_status_checks: .required_status_checks
           }' | tee -a $GITHUB_STEP_SUMMARY
+
+      - name: Summarize plan limitation
+        if: steps.protect.outputs.unsupported == 'true'
+        shell: bash
+        run: |
+          echo "Branch protection could not be enforced due to plan limitations." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Options to proceed:" >> $GITHUB_STEP_SUMMARY
+          echo "- Make the repository public (branch protection is free for public repos)." >> $GITHUB_STEP_SUMMARY
+          echo "- Upgrade to GitHub Pro/Team/Enterprise to enable branch protection on private repositories." >> $GITHUB_STEP_SUMMARY
+          echo "- Keep this workflow as-is; it will report the limitation and exit successfully so CI remains green." >> $GITHUB_STEP_SUMMARY
