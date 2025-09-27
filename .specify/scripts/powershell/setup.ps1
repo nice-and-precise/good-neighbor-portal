@@ -42,9 +42,28 @@ function Resolve-Php {
     throw "PHP is not installed or not in PATH. Please install PHP 8.1+ and retry."
 }
 $php = Resolve-Php
-$phpDir = Split-Path -Parent $php
-# Only compute ext dir for Windows; on Linux (CI) overriding extension_dir breaks extension loading
-$extDir = if ($IsWindows) { Join-Path $phpDir 'ext' } else { $null }
+
+# Resolve extension directory similarly to run.ps1 (Windows only)
+function Resolve-ExtDir {
+    param([string]$phpPath)
+    $phpDir = Split-Path -Parent $phpPath
+    $candidates = @()
+    $candidates += (Join-Path $phpDir 'ext')
+    $wingetDir = Join-Path $env:LOCALAPPDATA 'Microsoft\WinGet\Packages'
+    try {
+        $pdoSqliteDll = Get-ChildItem -Path $wingetDir -Recurse -Filter 'php_pdo_sqlite.dll' -ErrorAction SilentlyContinue |
+            Select-Object -First 1 -ExpandProperty FullName
+        if ($pdoSqliteDll) { $candidates += (Split-Path -Parent $pdoSqliteDll) }
+    } catch {}
+    foreach ($dir in $candidates | Where-Object { $_ -and (Test-Path $_) } ) {
+        $hasPdoSqlite = Test-Path (Join-Path $dir 'php_pdo_sqlite.dll')
+        $hasSqlite3 = Test-Path (Join-Path $dir 'php_sqlite3.dll')
+        if ($hasPdoSqlite -and $hasSqlite3) { return $dir }
+    }
+    return $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+}
+
+$extDir = if ($IsWindows) { Resolve-ExtDir -phpPath $php } else { $null }
 
 # Build a tiny PHP runner to apply schema/seed
 $runner = @'

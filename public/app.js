@@ -1,13 +1,13 @@
 (() => {
-  const state = { csrf: null, tenant: 'willmar-mn', token: null, loggedIn: false };
+  const state = { csrf: null, tenant: 'willmar-mn', token: null, loggedIn: false, pollTimer: null, detail: null };
   const $ = (s) => document.querySelector(s);
 
   async function getJSON(url, opts={}) {
     const res = await fetch(url, opts);
     return res.json();
   }
-  async function postJSON(url, data) {
-    const headers = { 'Content-Type': 'application/json' };
+  async function postJSON(url, data, extraHeaders={}) {
+    const headers = { 'Content-Type': 'application/json', ...extraHeaders };
     if (state.csrf) headers['X-CSRF'] = state.csrf;
     const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(data) });
     return res.json();
@@ -27,6 +27,59 @@
     }
   }
 
+  // Helpers for request detail refresh and notes
+  async function loadRequestDetail(id) {
+    const el = document.getElementById('detail');
+    try {
+      const r = await getJSON(`/api/request_get.php?id=${id}`);
+      if (r.ok) {
+        const o = r.request;
+        const statusEl = document.getElementById('detail-status');
+        const updatedEl = document.getElementById('detail-updated');
+        if (statusEl) statusEl.textContent = o.status;
+        if (updatedEl) updatedEl.textContent = o.updated_at || '—';
+        // Keep description immutable for now
+      } else {
+        el.style.display = '';
+        el.textContent = 'Request not found';
+      }
+    } catch {
+      el.style.display = '';
+      el.textContent = 'Request error';
+    }
+  }
+
+  async function loadRequestNotes(id) {
+    const notesEl = document.getElementById('notes');
+    if (!notesEl) return;
+    try {
+      const r = await getJSON(`/api/request_notes.php?request_id=${id}`);
+      if (r.ok) {
+        const items = (r.notes || []).map(n => `<li><strong>${n.staff_name || 'Staff'}</strong> — <span class="muted">${n.created_at}</span><br/>${escapeHtml(n.note)}</li>`).join('');
+        notesEl.innerHTML = `<ul style="margin:.25rem 0 0 1rem">${items || '<li>No notes yet</li>'}</ul>`;
+      } else {
+        notesEl.textContent = 'Notes unavailable';
+      }
+    } catch {
+      notesEl.textContent = 'Notes error';
+    }
+  }
+
+  function startPolling(id) {
+    if (state.pollTimer) { clearInterval(state.pollTimer); state.pollTimer = null; }
+    state.pollTimer = setInterval(() => {
+      // Only poll if still on same request route
+      const hash = location.hash;
+      if (!hash.match(/^#request\/(\d+)$/)) { clearInterval(state.pollTimer); state.pollTimer = null; return; }
+      loadRequestDetail(id);
+      loadRequestNotes(id);
+    }, 8000);
+  }
+
+  function stopPolling() { if (state.pollTimer) { clearInterval(state.pollTimer); state.pollTimer = null; } }
+
+  function escapeHtml(s) { return String(s).replace(/[&<>"]{1}/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
   // Simple hash router for request and billing details
   async function route() {
     const el = document.getElementById('detail');
@@ -42,14 +95,69 @@
           const o = r.request;
           el.style.display = '';
           el.innerHTML = `
-            <h3 style="margin-top:0">Request #${o.id}</h3>
+            <a href="#" id="back-link" style="text-decoration:none">← Back</a>
+            <h3 style="margin:.25rem 0 0">Request #${o.id}</h3>
             <div><strong>Category:</strong> ${o.category}</div>
-            <div><strong>Status:</strong> ${o.status}</div>
+            <div><strong>Status:</strong> <span id="detail-status">${o.status}</span></div>
             <div><strong>Address:</strong> ${o.address}</div>
             <div><strong>Created:</strong> ${o.created_at}</div>
-            <div><strong>Updated:</strong> ${o.updated_at || '—'}</div>
+            <div><strong>Updated:</strong> <span id="detail-updated">${o.updated_at || '—'}</span></div>
             <div style="margin-top:.5rem"><em>${o.description || ''}</em></div>
+            <hr/>
+            <div>
+              <h4 style="margin:.25rem 0">Staff controls (demo)</h4>
+              <label>Staff header key <input id="staff-key" type="text" placeholder="demo-staff" style="margin-left:.25rem"/></label>
+              <div style="margin-top:.5rem; display:flex; gap:.5rem; flex-wrap:wrap">
+                <button data-action="ack">Mark Acknowledged</button>
+                <button data-action="in_progress">Start Work</button>
+                <button data-action="done">Mark Done</button>
+                <button data-action="cancelled">Cancel</button>
+              </div>
+              <div style="margin-top:.5rem">
+                <input id="note-text" type="text" placeholder="Add staff note..." style="width:70%"/>
+                <button id="note-add">Add Note</button>
+                <div id="note-status" class="muted" style="margin-top:.25rem"></div>
+              </div>
+            </div>
+            <div style="margin-top:.75rem">
+              <h4 style="margin:.25rem 0">Notes</h4>
+              <div id="notes" class="card" style="background:#f9f9ff"></div>
+            </div>
           `;
+          // Listeners
+          const back = document.getElementById('back-link');
+          if (back) back.addEventListener('click', (e) => { e.preventDefault(); stopPolling(); location.hash = ''; });
+          const keyInput = document.getElementById('staff-key');
+          const noteInput = document.getElementById('note-text');
+          const noteStatus = document.getElementById('note-status');
+          const btns = el.querySelectorAll('button[data-action]');
+          btns.forEach(b => b.addEventListener('click', async () => {
+            const action = b.getAttribute('data-action');
+            const k = (keyInput && keyInput.value.trim()) || 'demo-staff';
+            b.disabled = true;
+            const res = await postJSON('/api/request_status_update.php', { id: Number(id), action }, { 'X-Staff-Key': k });
+            b.disabled = false;
+            if (res.ok) {
+              await loadRequestDetail(id);
+            } else {
+              alert(res.error || 'Status update failed');
+            }
+          }));
+          const addBtn = document.getElementById('note-add');
+          if (addBtn) addBtn.addEventListener('click', async () => {
+            const note = (noteInput && noteInput.value.trim()) || '';
+            const k = (keyInput && keyInput.value.trim()) || 'demo-staff';
+            if (!note) { noteStatus.textContent = 'Enter a note first.'; return; }
+            addBtn.disabled = true;
+            const res = await postJSON('/api/request_note_create.php', { request_id: Number(id), note }, { 'X-Staff-Key': k });
+            addBtn.disabled = false;
+            if (res.ok) { noteInput.value = ''; noteStatus.textContent = 'Note added.'; await loadRequestNotes(id); }
+            else { noteStatus.textContent = res.error || 'Note failed'; }
+          });
+          // Initial loads and polling
+          await loadRequestNotes(id);
+          startPolling(id);
+          state.detail = { kind: 'request', id: Number(id) };
           el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         } else {
           el.style.display = '';
@@ -63,6 +171,8 @@
     }
     if (mBill) {
       const id = mBill[1];
+      stopPolling();
+      state.detail = { kind: 'billing', id: Number(id) };
       try {
         const r = await getJSON(`/api/billing_get.php?id=${id}`);
         if (r.ok) {
@@ -86,6 +196,8 @@
       return;
     }
     // No route
+    stopPolling();
+    state.detail = null;
     el.style.display = 'none';
     el.innerHTML = '';
   }
@@ -146,7 +258,7 @@
     init();
   }
 
-  window.addEventListener('hashchange', route);
+  window.addEventListener('hashchange', () => { route(); if (state.loggedIn) { loadActivity(); } });
 
   async function loadDashboard() {
     try {
@@ -170,13 +282,16 @@
       const r = await getJSON('/api/recent_activity.php');
       if (!r.ok) { $('#activity').textContent = 'Activity unavailable.'; return; }
       const money = (c) => `$${(c/100).toFixed(2)}`;
+      const current = location.hash || '';
       const items = r.items.map(it => {
         if (it.kind === 'request') {
           const href = `#request/${it.id}`; // placeholder for future detail page
-          return `<li>${it.created_at}: <a href="${href}">Request #${it.id}</a> — ${it.type} <em>(${it.status})</em></li>`;
+          const style = (current === href) ? 'style="font-weight:bold;text-decoration:underline"' : '';
+          return `<li>${it.created_at}: <a href="${href}" ${style}>Request #${it.id}</a> — ${it.type} <em>(${it.status})</em></li>`;
         } else {
           const href = `#billing/${it.id}`; // placeholder for future detail page
-          return `<li>${it.created_at}: <a href="${href}">Charge #${it.id}</a> — ${it.description} <strong>${money(it.amount_cents)}</strong></li>`;
+          const style = (current === href) ? 'style="font-weight:bold;text-decoration:underline"' : '';
+          return `<li>${it.created_at}: <a href="${href}" ${style}>Charge #${it.id}</a> — ${it.description} <strong>${money(it.amount_cents)}</strong></li>`;
         }
       }).join('');
       $('#activity').innerHTML = `

@@ -55,4 +55,27 @@ Write-Host "Request detail OK: address='$($reqDetail.request.address)' status=$(
 $act = (Invoke-WebRequest -UseBasicParsing -Uri "$Base/api/recent_activity.php" -WebSession $session).Content | ConvertFrom-Json
 if (-not $act.ok -or $act.items.Count -lt 1) { throw 'recent_activity failed' }
 Write-Host "Activity OK: items=$($act.items.Count)" -ForegroundColor Green
+# Staff lifecycle (demo)
+$staffKey = 'demo-staff'
+$headersStaff = @{ 'X-CSRF' = $csrf; 'X-Staff-Key' = $staffKey }
+
+# Transition status to ack
+$bodyAck = @{ id = $rc.id; action = 'ack' } | ConvertTo-Json
+$ackResp = Invoke-WebRequest -UseBasicParsing -Uri "$Base/api/request_status_update.php" -Method Post -Body $bodyAck -ContentType 'application/json' -Headers $headersStaff -WebSession $session
+$ack = $ackResp.Content | ConvertFrom-Json
+if (-not $ack.ok -or $ack.status -ne 'ack') { throw 'request_status_update ack failed' }
+Write-Host "Status update OK: $($ack.status)" -ForegroundColor Green
+
+# Add a staff note
+$noteText = "Arriving soon for request #$($rc.id)"
+$bodyNote = @{ request_id = $rc.id; note = $noteText } | ConvertTo-Json
+$noteResp = Invoke-WebRequest -UseBasicParsing -Uri "$Base/api/request_note_create.php" -Method Post -Body $bodyNote -ContentType 'application/json' -Headers $headersStaff -WebSession $session
+$note = $noteResp.Content | ConvertFrom-Json
+if (-not $note.ok) { throw 'request_note_create failed' }
+Write-Host "Note create OK: id=$($note.id)" -ForegroundColor Green
+
+# Verify notes list contains our note
+$notesList = (Invoke-WebRequest -UseBasicParsing -Uri "$Base/api/request_notes.php?request_id=$($rc.id)" -Headers @{ } -WebSession $session).Content | ConvertFrom-Json
+if (-not $notesList.ok -or -not ($notesList.notes | Where-Object { $_.note -eq $noteText })) { throw 'request_notes missing expected note' }
+Write-Host "Notes list OK: count=$($notesList.notes.Count)" -ForegroundColor Green
 Write-Host "Auth flow OK" -ForegroundColor Green
