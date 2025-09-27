@@ -66,18 +66,26 @@ async function run() {
 
     // Verify i18n toggle (best-effort without login)
     try {
-      // Click Español and wait for 'Idioma' heading
-      await page.click('button[data-lang="es"]');
-      await page.waitForSelector('[data-i18n="language"]');
-      const headingEs = await page.textContent('[data-i18n="language"]');
-      const i18nOkEs = headingEs && headingEs.toLowerCase().includes('idioma');
-      await page.screenshot({ path: path.join(outDir, `desktop-es-${ts}.png`), fullPage: true });
-      // Switch back to English
-      await page.click('button[data-lang="en"]');
-      await page.waitForSelector('[data-i18n="language"]');
-      const headingEn = await page.textContent('[data-i18n="language"]');
-      const i18nOkEn = headingEn && headingEn.toLowerCase().includes('language');
-      writeJSON(path.join(outDir, `i18n-check-${ts}.json`), { es: !!i18nOkEs, en: !!i18nOkEn, headingEs, headingEn });
+      const esSel = 'button[data-lang="es"]';
+      const enSel = 'button[data-lang="en"]';
+      const esVisible = await page.isVisible(esSel).catch(() => false);
+      const enVisible = await page.isVisible(enSel).catch(() => false);
+      if (esVisible && enVisible) {
+        // Click Español and wait for heading to update
+        await page.click(esSel);
+        await page.waitForSelector('[data-i18n="language"]');
+        const headingEs = await page.textContent('[data-i18n="language"]');
+        const i18nOkEs = !!(headingEs && headingEs.toLowerCase().includes('idioma'));
+        await page.screenshot({ path: path.join(outDir, `desktop-es-${ts}.png`), fullPage: true });
+        // Switch back to English
+        await page.click(enSel);
+        await page.waitForSelector('[data-i18n="language"]');
+        const headingEn = await page.textContent('[data-i18n="language"]');
+        const i18nOkEn = !!(headingEn && headingEn.toLowerCase().includes('language'));
+        writeJSON(path.join(outDir, `i18n-check-${ts}.json`), { es: i18nOkEs, en: i18nOkEn, headingEs, headingEn });
+      } else {
+        writeJSON(path.join(outDir, `i18n-check-${ts}.json`), { skipped: true, reason: 'i18n controls not visible (likely require login)' });
+      }
     } catch (e) {
       writeJSON(path.join(outDir, `i18n-check-${ts}.json`), { error: String(e) });
     }
