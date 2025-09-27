@@ -102,6 +102,20 @@ specify check
 .\.specify\scripts\powershell\test-auth.ps1 -Email someone@example.com -Tenant kandiyohi-mn
 ```
 
+### Request/Billing Details (M3.2)
+
+- `GET /api/request_get.php?id=...` and `GET /api/billing_get.php?id=...` power a simple detail view with hash routing.
+- Front-end routes: `#request/<id>` and `#billing/<id>`.
+
+### Staff Lifecycle and Notes (M3.3)
+
+- Demo staff endpoints (use `X-Staff-Key` header; default `demo-staff`):
+	- `POST /api/request_status_update.php` to transition status: ack, in_progress, done, cancelled
+	- `POST /api/request_note_create.php` to add a note
+	- `GET /api/request_notes.php?request_id=...` to list notes
+- Front-end: request detail view includes staff controls, notes UI, and polling.
+- Windows setup improved to auto-detect PHP extension_dir for pdo_sqlite/sqlite3 (no php.ini edits required).
+
 ## Documentation (Spec Kit)
 
 This repo follows Spec-Driven Development with GitHub Spec Kit. See:
@@ -115,15 +129,21 @@ Milestones tracked in `CHANGELOG.md`:
 - M2: Auth endpoints/UI, runtime fixes, diagnostics, E2E auth test
 - M3: Dashboard API/UI, billing seeding
 - M3.1: Recent Activity API/UI, multi-tenant demo, improved tests
+ - M3.2: Request/Billing details endpoints and UI
+ - M3.3: Staff lifecycle + notes + polling; Windows SQLite setup fix; endpoints/docs/hygiene
 
 ## CI and Releases
 
 - Continuous Integration: GitHub Actions workflow runs end-to-end tests for both tenants on every push and PR to `main`.
 	- Workflow: `.github/workflows/ci.yml`
-	- Required checks (recommended): Protect `main` and require the “PHP E2E” job to pass.
+	- Required checks (recommended): Protect `main` and require the “PHP E2E” job to pass. Use the "Apply Branch Protection" workflow to pin checks.
 - Releases: Push a marker file under `.github/release-requests/<tag>` to trigger the Release workflow.
 	- Workflow: `.github/workflows/release.yml`
 	- Notes are pulled from `CHANGELOG.md` (section for the tag label) or `docs/releases/<tag>.md` fallback.
+
+### Endpoints Reference
+
+See `docs/endpoints.md` for a consolidated list of API endpoints and headers.
 
 ## Contributing
 
