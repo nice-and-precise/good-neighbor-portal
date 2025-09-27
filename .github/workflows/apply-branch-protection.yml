@@ -1,5 +1,5 @@
 name: Apply Branch Protection
-'on':
+on:
   # Run once when this workflow file is added/changed
   push:
     paths:
