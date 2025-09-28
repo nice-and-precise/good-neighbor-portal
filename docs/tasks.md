@@ -49,6 +49,60 @@ Reference: docs/plan.md, docs/spec.md, docs/decisions.md
 - CI: enforce smoke + unit tests (added), keep artifacts from web audit; consider matrix for PHP 8.1/8.2.
 - Error handling: display friendly toast on API errors; keep logs sanitized.
 
+## M8: UI Enhancements (Progressive, Responsive, A11y)
+
+Branching & Workflow
+- Create feature branch: `feature/ui-enhancements` (done)
+- Conventional commits with scope: `docs:`, `feat(ui):`, `fix(a11y):`, `chore(audit):`
+- Keep changes isolated to docs and front-end assets; no PHP endpoint changes
+
+Tasks
+1) Progressive Toggle (vanilla JS)
+	- Add UI toggle control in header (checkbox or button) with i18n label
+	- Persist mode to `localStorage.uiMode` (`standard|enhanced`)
+	- Apply `document.body.classList.toggle('enhanced', mode==='enhanced')`
+	- Ensure initial mode is read at app bootstrap before rendering content
+
+2) CSS-only Enhancement Layer
+	- Create enhancement styles that only apply under `.enhanced` body class
+	- Mobile-first CSS; define breakpoints xs, sm, md, lg, xl
+	- Do not remove or rename existing ids used by tests/scripts
+
+3) Accessibility Improvements
+	- Add landmarks: header, nav, main, footer
+	- Associate labels/inputs; add aria-describedby for helper text
+	- Add aria-live regions for status/toasts; ensure role=status
+	- Verify and fix contrast to AA; document exceptions (if any)
+
+4) i18n for Enhancement UI
+	- Add keys for toggle, banner, and contextual help to `public/i18n/en.json`
+	- Wire translations via existing `t()` helper
+
+5) Demo Banner & Contextual Help
+	- Add dismissible demo banner (no external deps)
+	- Add inline help texts for login form and staff controls
+
+6) Testing & Validation
+	- Run `tools/web-audit.mjs` to produce a11y/contrast artifacts for both modes
+	- Run `tests/smoke.ps1` in both modes (pre-set localStorage or script hook)
+	- Ensure `phpstan` passes (no new PHP changes necessary)
+
+Deliverables
+- Updated docs: `docs/spec.md`, `docs/plan.md`, `docs/tasks.md`
+- New docs: `docs/ui-guide.md`, `docs/accessibility.md`, `docs/responsive.md`
+- Front-end: toggle JS, enhancement CSS, aria fixes, i18n strings
+
+Acceptance Checklist
+- [ ] Toggle persists and switches modes without breaking routes or auth
+- [ ] No horizontal scroll on xs–xl; tap targets ≥ 44px
+- [ ] WCAG 2.1 AA checks pass; issues tracked in artifacts
+- [ ] Demo scripts and smoke tests succeed in both modes
+
+References
+- Spec UI-001..UI-005 (`docs/spec.md`)
+- Plan M8 (`docs/plan.md`)
+- Spec-Kit workflow: see `.github/prompts/` and `docs/development-workflow.md`
+
 ## Acceptance Checklists
 - Validate FR-001..FR-014 via manual smoke + scripts
 - Performance: start < 10s; queue polling responsive

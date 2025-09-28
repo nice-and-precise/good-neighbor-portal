@@ -105,12 +105,49 @@ public/index.php (+ index.html, app.js, api/), src/Lib, config, i18n, data, scri
 - M5 Staff queue + polling + notes
 - M6 Route summary + CSV
 - M7 i18n + toggle + smoke tests
+- M8 UI Enhancements (progressive, responsive, accessibility)
 
 Alignment status (2025‑09‑27):
 - M1–M4: Implemented via SPA + API endpoints
 - M5: Implemented (staff transitions + notes + queue list)
 - M6: Implemented (route summary + CSV export)
 - M7: Implemented (i18n + toggle + smoke/unit tests)
+- M8: Planned (progressive enhancement system; responsive polish; WCAG 2.1 AA)
+
+## 11.1) Milestone 8 — UI Enhancements
+
+Dependencies:
+- Depends on: M2 (auth and hash routing), M3–M5 (core views present), M7 (i18n available)
+- Independent of: Data model and API endpoints (no backend changes required)
+
+Scope:
+- Progressive enhancement toggle (standard vs enhanced) with `localStorage` persistence
+- CSS-only enhancement layer loaded conditionally by a body class or data-attribute
+- Mobile-first responsive refinements across login, dashboard, staff queue
+- Accessibility improvements to meet WCAG 2.1 AA
+- Demo banner and contextual help with i18n
+
+Acceptance Criteria:
+- Toggle: `uiMode` persisted; default `standard`; switching adds/removes body class `enhanced` with no layout breakage
+- Responsive breakpoints: xs <480, sm 480–767, md 768–1023, lg 1024–1439, xl ≥1440
+	- No horizontal scroll; content reflows; tap targets ≥44px; focus ring visible
+- Accessibility: Landmarks, labels, roles, aria-live regions present; contrast AA validated
+- Compatibility: Hash routes (#login, #dashboard, #staff) unchanged; stable ids for demo scripts
+
+Testing Strategy:
+- Manual smoke in both modes (toggle on/off), across two viewport widths per breakpoint category
+- Automated web audit: run existing audit to capture a11y, console, contrast artifacts (see `tools/web-audit.mjs`)
+- PowerShell demo scripts: run tests/smoke.ps1 under both modes by pre-setting localStorage via query or dev hook
+- PHPStan analysis: unchanged; ensure no PHP changes introduce new issues
+
+Implementation Notes:
+- Keep vanilla JS/CSS; no external frameworks or build step
+- New files under docs/: ui-guide.md, accessibility.md, responsive.md for developer guidance
+- i18n: add new keys in `public/i18n/en.json`; preserve existing keys used by scripts
+
+Cross-references:
+- Spec requirements UI-001..UI-005 (`docs/spec.md`)
+- Tasks breakdown (`docs/tasks.md` M8)
 
 ## 12) Risks
 - Magic‑link UX without email could confuse; mitigate with clear UI copy

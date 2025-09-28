@@ -272,6 +272,15 @@ graph LR
 
 ---
 
+### 🔼 UI Enhancements (Feature Branch)
+
+- Spec additions: `docs/spec.md` (UI-001..UI-005)
+- Plan milestone: `docs/plan.md` (Milestone 8)
+- Tasks breakdown: `docs/tasks.md` (M8)
+- Developer guides: `docs/ui-guide.md`, `docs/accessibility.md`, `docs/responsive.md`
+
+Changes are being developed on `feature/ui-enhancements` to avoid impacting `main` until validated.
+
 ## 🎯 Getting Started Workflows
 
 Choose your path based on your role:
