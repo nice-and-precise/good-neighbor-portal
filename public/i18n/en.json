@@ -24,6 +24,8 @@
   "statusLabel": "Status",
   "loadQueue": "Load queue",
   "autoRefresh": "Auto-refresh",
+  "autoRefreshOn": "Auto-refresh is ON",
+  "autoRefreshOff": "Auto-refresh is OFF",
   "demoFooter": "Demo data only · M3/M4",
   "paySuccess": "Payment accepted (demo).",
   "payFailed": "Payment failed (demo).",

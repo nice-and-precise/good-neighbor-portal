@@ -371,8 +371,12 @@
       if (queueTimer) clearInterval(queueTimer);
       queueTimer = setInterval(loadStaffQueue, 5000);
       loadStaffQueue();
+      const st = document.getElementById('queue-auto-status');
+      if (st) st.textContent = t('autoRefreshOn','Auto-refresh is ON');
     } else if (queueTimer) {
       clearInterval(queueTimer); queueTimer = null;
+      const st = document.getElementById('queue-auto-status');
+      if (st) st.textContent = t('autoRefreshOff','Auto-refresh is OFF');
     }
   });
 

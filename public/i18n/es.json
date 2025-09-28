@@ -24,6 +24,8 @@
   "statusLabel": "Estado",
   "loadQueue": "Cargar cola",
   "autoRefresh": "Actualización automática",
+  "autoRefreshOn": "La actualización automática está ACTIVADA",
+  "autoRefreshOff": "La actualización automática está DESACTIVADA",
   "demoFooter": "Datos de demostración únicamente · M3/M4",
   "paySuccess": "Pago aceptado (demostración).",
   "payFailed": "Pago fallido (demostración).",
