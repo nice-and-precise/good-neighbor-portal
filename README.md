@@ -35,7 +35,7 @@
 ### Prerequisites Checklist
 - [ ] PHP 8.1+ installed
 - [ ] Git available
-- [ ] PowerShell (Windows) or Bash (macOS/Linux)
+- [ ] PowerShell (Windows)
 - [ ] VS Code with GitHub Copilot (recommended)
 
 ### ⚡ One-Command Setup
@@ -54,19 +54,7 @@ cd good-neighbor-portal
 ```
 </details>
 
-<details>
-<summary><strong>🐧 macOS/Linux (Bash)</strong></summary>
 
-```bash
-# Clone and setup
-git clone https://github.com/jdamhofBBW/good-neighbor-portal
-cd good-neighbor-portal
-./.specify/scripts/bash/setup.sh
-
-# Start development server
-./.specify/scripts/bash/run.sh 8080
-```
-</details>
 
 ### 🎉 Access Your Portal
 
@@ -290,11 +278,10 @@ Choose your path based on your role:
 <summary><strong>👩‍💻 I'm a Developer</strong></summary>
 
 1. **📥 Clone & Setup**
-   ```bash
+   ```powershell
    git clone https://github.com/jdamhofBBW/good-neighbor-portal
    cd good-neighbor-portal
-   ./.specify/scripts/powershell/setup.ps1  # Windows
-   ./.specify/scripts/bash/setup.sh         # macOS/Linux
+   .\.specify\scripts\powershell\setup.ps1  # Windows
    ```
 
 2. **📖 Read Core Docs**

@@ -7,7 +7,7 @@ This guide helps you set up a local environment, understand the code layout, and
 Prerequisites
 - PHP 8.1+
 - Git
-- Windows PowerShell (scripts are provided; macOS/Linux equivalents can be added later)
+- Windows PowerShell (scripts are provided)
 
 Setup and run
 
@@ -19,14 +19,6 @@ cd good-neighbor-portal
 
 # Start development server (defaults to 8080)
 .\.specify\scripts\powershell\run.ps1 -Port 8080
-```
-
-macOS/Linux equivalents
-```bash
-git clone https://github.com/jdamhofBBW/good-neighbor-portal
-cd good-neighbor-portal
-. ./.specify/scripts/bash/setup.sh
-. ./.specify/scripts/bash/run.sh 8080
 ```
 
 Access the app at http://127.0.0.1:8080

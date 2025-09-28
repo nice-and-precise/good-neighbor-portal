@@ -23,9 +23,7 @@ Quality gates before merge:
 ## Local Development
 
 - Setup once (Windows): .\.specify\scripts\powershell\setup.ps1
-- Setup once (macOS/Linux): ./.specify/scripts/bash/setup.sh
 - Run server (Windows): .\.specify\scripts\powershell\run.ps1 -Port 8080
-- Run server (macOS/Linux): ./.specify/scripts/bash/run.sh
 - Smoke test: .\tests\smoke.ps1 -BaseUrl http://127.0.0.1:8080
 - Pay test: .\tests\pay-deterministic.ps1 -BaseUrl http://127.0.0.1:8080
 

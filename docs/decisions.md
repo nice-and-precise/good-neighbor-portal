@@ -20,4 +20,4 @@ Repository & Release Management:
 - CHANGELOG: Maintain `CHANGELOG.md` with milestone summaries (M1, M2, ...)
 
 Tooling & Cross-platform (update):
-- Added Bash parity scripts under `.specify/scripts/bash` for setup, run, reset, export, and lint to match PowerShell equivalents, maintaining Windows-first ergonomics while enabling Linux/macOS contributors and CI parity.
+- Windows-first tooling with PowerShell scripts for setup, run, reset, export, and lint to maintain ergonomic development workflows.
