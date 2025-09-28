@@ -39,14 +39,11 @@ git push --force-with-lease origin main
 ```
 
 ## Quality Gates (All Workflows)
-1. **Local validation**: `pwsh -File tools/audit-runner.ps1`
-2. **Smoke tests**: `pwsh -File tests/smoke.ps1 -Base "http://127.0.0.1:8080"`
-3. **Unit tests**: `php tests/unit/validator_test.php`
-4. **Payment logic**: `pwsh -File tests/pay-deterministic.ps1 -Base "http://127.0.0.1:8080"`
-5. **Conventional commit** with scope: `feat(api):`, `fix(ui):`, `docs(setup):`
-6. **PHPStan passes**: `./vendor/bin/phpstan analyse` (if Composer installed)
-7. **Update docs** if behavior changes
 
+**Test & Validation Suite:**
+1. Run all core checks (local validation, smoke, unit, payment logic):
+   ```bash
+   pwsh -File tools/all-checks.ps1
 ## Scopes
 Use: `auth`, `billing`, `dashboard`, `api`, `ui`, `db`, `docs`, `ci`, `config`, `audit`, `i18n`, `staff`, `tenant`, `export`, `test`
 # Good Neighbor Portal - Copilot Development Instructions
