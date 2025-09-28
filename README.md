@@ -257,6 +257,9 @@ graph LR
 | [🔗 API Endpoints](docs/endpoints.md) | Complete endpoint reference | [View →](docs/endpoints.md) |
 | [🎨 UX/UI Guide](docs/ux-ui-implementation-guide.md) | Design implementation | [View →](docs/ux-ui-implementation-guide.md) |
 | [📝 UX/UI Review](docs/ux-ui-review.md) | Usability recommendations | [View →](docs/ux-ui-review.md) |
+| [🧭 UI Mode & Progressive Enhancement](docs/ui-guide.md) | Developer guide for UI toggle and body.enhanced | [View →](docs/ui-guide.md) |
+| [♿ Accessibility Checklist](docs/accessibility.md) | WCAG 2.1 AA verification steps | [View →](docs/accessibility.md) |
+| [📱 Responsive Guide](docs/responsive.md) | Breakpoints and mobile-first patterns | [View →](docs/responsive.md) |
 
 ### 📋 Spec Kit Methodology
 
@@ -435,3 +438,30 @@ Choose your path based on your role:
 *Last updated: 2024-12-19 | Built with [Spec Kit](https://github.com/specify-kit) methodology*
 
 </div>
+
+---
+
+## 🔼 UI Enhancements (Feature Branch)
+
+Developed on `feature/ui-enhancements` to avoid impacting `main` until validated.
+
+What’s included:
+- Progressive UI toggle with persistence (`localStorage` key `uiMode`) and i18n labels
+- Enhancement styles scoped under `body.enhanced` (standard mode unchanged)
+- Web audit support for enhanced mode with an npm alias
+- PowerShell compatibility fix for the deterministic payment test
+
+Try it locally:
+
+```powershell
+# Start dev server (example)
+php -S 127.0.0.1:8080 -t public
+
+# Default audit (standard mode)
+npm run web-audit
+
+# Enhanced-mode audit (cross-platform)
+npm run web-audit:enhanced
+```
+
+Cross-references: see `docs/spec.md` (UI-001..UI-005), `docs/plan.md` (M8), `docs/tasks.md` (M8), and the guides in `docs/ui-guide.md`, `docs/accessibility.md`, `docs/responsive.md`.
