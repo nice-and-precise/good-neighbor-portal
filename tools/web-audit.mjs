@@ -23,6 +23,7 @@ async function run() {
   await ensureDir(outDir);
 
   const url = process.env.TARGET_URL || 'http://127.0.0.1:8080/';
+  const uiMode = (process.env.UI_MODE || '').toLowerCase();
 
   // Import playwright lazily to allow workflow to install it
   const { chromium, devices } = await import('playwright');
@@ -48,10 +49,17 @@ async function run() {
     });
 
     await page.goto(url, { waitUntil: 'networkidle' });
+    if (uiMode === 'enhanced' || uiMode === 'standard') {
+      await page.evaluate((m) => {
+        try { localStorage.setItem('uiMode', m); } catch {}
+        document.body.classList.toggle('enhanced', m === 'enhanced');
+      }, uiMode);
+      await page.waitForTimeout(100);
+    }
     await page.waitForTimeout(500); // small settle
 
     // Desktop screenshot and DOM
-    const ts = timestamp();
+  const ts = timestamp();
   await page.screenshot({ path: path.join(outDir, `desktop-${ts}.png`), fullPage: true });
     const html = await page.content();
     fs.writeFileSync(path.join(outDir, `dom-${ts}.html`), html, 'utf-8');
@@ -183,7 +191,7 @@ async function run() {
       files: fs.readdirSync(outDir).filter(f => f.includes(ts)),
       counts: { console: consoleLogs.length, requests: network.requests.length, responses: network.responses.length }
     };
-    writeJSON(path.join(outDir, `summary-${ts}.json`), summary);
+  writeJSON(path.join(outDir, `summary-${ts}.json`), { ...summary, uiMode: uiMode || 'default' });
 
     await context.close();
   } finally {
