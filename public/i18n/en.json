@@ -94,5 +94,9 @@
   "statusCancelled": "Cancelled"
   ,
   "notAuthorizedStaffNote": "Not authorized. Enter the demo staff key to add notes.",
-  "notAuthorizedStaffStatus": "Not authorized. Enter the demo staff key to update status."
+  "notAuthorizedStaffStatus": "Not authorized. Enter the demo staff key to update status.",
+  "uiMode": "UI Mode",
+  "enhancedToggleLabel": "Enhanced UI",
+  "uiModeEnhanced": "Enhanced mode on",
+  "uiModeStandard": "Standard mode on"
 }

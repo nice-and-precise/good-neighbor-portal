@@ -41,6 +41,16 @@
     .col { flex: 1 1 320px; min-width:280px; }
     /* Avoid horizontal scroll on small screens */
     html, body { max-width:100%; overflow-x:hidden; }
+
+    /* Enhancement styles are applied only when body has .enhanced */
+    body.enhanced .card { box-shadow: 0 2px 6px rgba(0,0,0,.15); border-color:#c8ced8; }
+    body.enhanced .badge { background:#e9f2ff; color:#15396b; border-color:#7aa9ff; }
+    body.enhanced button { background:#2256a3; border-color:#1c4687; }
+    body.enhanced button:hover { background:#1f4d92; }
+    body.enhanced .muted { color:#3a3a3a; }
+    @media (max-width: 768px) {
+      body.enhanced main { padding-bottom: .5rem; }
+    }
   </style>
 </head>
 <body>
@@ -146,7 +156,16 @@
             <div id="i18n-status" class="muted" style="margin-top:.25rem"></div>
           </div>
         </div>
-        <div class="col"></div>
+        <div class="col">
+          <div id="ui-mode" class="card">
+            <h3 style="margin-top:0" data-i18n="uiMode">UI Mode</h3>
+            <label>
+              <input id="ui-enhanced-toggle" type="checkbox" />
+              <span data-i18n="enhancedToggleLabel">Enhanced UI</span>
+            </label>
+            <div id="ui-mode-status" class="muted" style="margin-top:.25rem"></div>
+          </div>
+        </div>
         <div class="col"></div>
       </div>
       <div class="row" style="margin-top:.5rem">

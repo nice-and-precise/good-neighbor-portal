@@ -94,5 +94,9 @@
   "statusCancelled": "Cancelado"
   ,
   "notAuthorizedStaffNote": "No autorizado. Ingrese la clave de personal de demostración para agregar notas.",
-  "notAuthorizedStaffStatus": "No autorizado. Ingrese la clave de personal de demostración para actualizar el estado."
+  "notAuthorizedStaffStatus": "No autorizado. Ingrese la clave de personal de demostración para actualizar el estado.",
+  "uiMode": "Modo de interfaz",
+  "enhancedToggleLabel": "Interfaz mejorada",
+  "uiModeEnhanced": "Modo mejorado activado",
+  "uiModeStandard": "Modo estándar activado"
 }
