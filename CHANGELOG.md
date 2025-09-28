@@ -27,3 +27,5 @@ All notable changes to this project will be documented in this file.
 	- Added guides: `docs/ui-guide.md`, `docs/accessibility.md`, `docs/responsive.md`
 	- Spec-driven docs refreshed: `docs/spec.md`, `docs/plan.md`, `docs/tasks.md`, `docs/constitution.md`
 
+Links: [UI Guide](docs/ui-guide.md) • [Accessibility](docs/accessibility.md) • [Responsive](docs/responsive.md) • [Web audit artifacts](artifacts/web-audit/)
+
