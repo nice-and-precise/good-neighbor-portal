@@ -9,7 +9,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "web-audit": "node tools/web-audit.mjs"
+    "web-audit": "node tools/web-audit.mjs",
+    "web-audit:enhanced": "node tools/web-audit-enhanced.cjs"
   },
   "repository": {
     "type": "git",

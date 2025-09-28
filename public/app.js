@@ -1,6 +1,16 @@
 (() => {
   const state = { csrf: null, tenant: 'willmar-mn', token: null, loggedIn: false, pollTimer: null, detail: null };
   const $ = (s) => document.querySelector(s);
+  const UI_MODE_KEY = 'uiMode';
+  function applyUiMode(mode) {
+    const m = (mode === 'enhanced') ? 'enhanced' : 'standard';
+    try { localStorage.setItem(UI_MODE_KEY, m); } catch {}
+    document.body.classList.toggle('enhanced', m === 'enhanced');
+    const chk = document.getElementById('ui-enhanced-toggle');
+    if (chk) chk.checked = (m === 'enhanced');
+    const el = document.getElementById('ui-mode-status');
+    if (el) el.textContent = (m === 'enhanced') ? t('uiModeEnhanced','Enhanced mode on') : t('uiModeStandard','Standard mode on');
+  }
 
   async function getJSON(url, opts={}) {
     // Attach dev session header if present
@@ -45,6 +55,10 @@
       $('#status').textContent = '';
       await loadI18n();
       applyI18n();
+  // Apply persisted UI mode early
+  let persisted = 'standard';
+  try { persisted = localStorage.getItem(UI_MODE_KEY) || 'standard'; } catch {}
+  applyUiMode(persisted);
       if (!cookieEnabled) {
         // Provide a clear, non-blocking hint
         const msg = 'Heads up: Your environment may be blocking cookies. Login may fail here. Open in your system browser for full functionality.';
@@ -379,6 +393,15 @@
           document.getElementById('i18n-status').textContent = res.error || t('langToggleFailed','Lang toggle failed');
         }
   } catch { document.getElementById('i18n-status').textContent = t('langToggleFailed','Lang toggle failed'); }
+    });
+  }
+
+  // UI mode toggle (progressive enhancement)
+  const uiToggle = document.getElementById('ui-enhanced-toggle');
+  if (uiToggle) {
+    uiToggle.addEventListener('change', () => {
+      const mode = uiToggle.checked ? 'enhanced' : 'standard';
+      applyUiMode(mode);
     });
   }
 

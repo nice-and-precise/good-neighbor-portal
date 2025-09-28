@@ -9,7 +9,29 @@ $script:sess = $null
 function Get-Json($url) { (Invoke-WebRequest -Uri $url -UseBasicParsing -WebSession $script:sess).Content | ConvertFrom-Json }
 function Invoke-PostJson($url, $obj, $headers=@{}) {
   $json = $obj | ConvertTo-Json -Compress
-  (Invoke-WebRequest -Uri $url -Method Post -Body $json -ContentType 'application/json' -Headers $headers -UseBasicParsing -WebSession $script:sess -SkipHttpErrorCheck).Content | ConvertFrom-Json
+  $resp = $null
+  try {
+    $resp = Invoke-WebRequest -Uri $url -Method Post -Body $json -ContentType 'application/json' -Headers $headers -UseBasicParsing -WebSession $script:sess -ErrorAction Stop
+    return ($resp.Content | ConvertFrom-Json)
+  } catch {
+    # Attempt to read the error response body (e.g., 4xx with JSON payload)
+    $ex = $_.Exception
+    if ($ex -and $ex.Response) {
+      try {
+        $stream = $ex.Response.GetResponseStream()
+        $reader = New-Object System.IO.StreamReader($stream)
+        $body = $reader.ReadToEnd()
+        if ($reader) { $reader.Dispose() }
+        if ($stream) { $stream.Dispose() }
+        if ($body) {
+          return ($body | ConvertFrom-Json)
+        }
+      } catch {
+        # Fall through to rethrow
+      }
+    }
+    throw
+  }
 }
 
 # Init session/CSRF

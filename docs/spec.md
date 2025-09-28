@@ -36,6 +36,29 @@ West Central Sanitation needs a demo-ready MVP portal that runs entirely on a de
 - **FR-013**: System MUST provide one-command demo data reset script
 - **FR-014**: System MUST start locally in under 10 seconds and support offline operation
 
+### UI Enhancements (Post-MVP)
+- **UI-001 (Progressive Toggle)**: Provide a progressive enhancement toggle with two modes: "standard" (baseline) and "enhanced" (optional UI polish). The toggle MUST:
+	- Be discoverable in the header settings area
+	- Persist via `localStorage` key `uiMode` with values `standard|enhanced` and default to `standard`
+	- Apply without breaking navigation or authentication
+	- Degrade gracefully if JS is disabled (standard mode only)
+- **UI-002 (Mobile-first Responsive)**: Implement mobile-first CSS with the following responsive breakpoints: xs <480, sm 480–767, md 768–1023, lg 1024–1439, xl ≥1440. Key views (#login, #dashboard, #staff) MUST:
+	- Avoid horizontal scrolling at all breakpoints
+	- Maintain minimum 44px tap targets on interactive elements
+	- Reflow layout using flex/grid so content remains readable and operable
+- **UI-003 (Accessibility – WCAG 2.1 AA)**: Meet WCAG 2.1 AA with focus on:
+	- Landmarks and roles (header, nav, main, region/status)
+	- Keyboard-only navigation and visible focus states
+	- Color contrast for text and interactive elements (AA thresholds)
+	- Form semantics (label/for, aria-describedby, error associations)
+	- Live regions for async updates (aria-live polite/assertive as appropriate)
+	- Skip-to-content link and logical heading structure
+- **UI-004 (i18n Integration)**: All enhancement UI (toggle, banner, help text) MUST use i18n keys and work with existing resources (e.g., `public/i18n/en.json`). New strings MUST be added in English with placeholders for other locales.
+- **UI-005 (Demo Compatibility)**: Enhancements MUST preserve compatibility with demo scripts and tests:
+	- Keep stable DOM ids used by demos/tests (e.g., `#request`, `#verify`, `#status`)
+	- Do not change API endpoints or authentication flow
+	- Enhanced mode MUST NOT be required for scripts to pass
+
 ### Key Entities
 - **Resident Account**: Demo login credentials, service address, pickup schedule, language preference
 - **Service Request**: Request type, description, status, confirmation ID, staff notes
@@ -57,6 +80,20 @@ West Central Sanitation needs a demo-ready MVP portal that runs entirely on a de
 - [x] Success criteria are measurable
 - [x] Scope is clearly bounded (demo-only, local development)
 - [x] Dependencies and assumptions identified
+
+### UI Enhancements Validation
+- [ ] UI-001: Toggle persists across reloads (localStorage) and can be changed without breaking hash routing
+- [ ] UI-002: No horizontal scroll on xs–xl; tap targets ≥ 44px; forms and cards reflow cleanly
+- [ ] UI-003: WCAG 2.1 AA checklist passes; audit artifacts attached (see `artifacts/web-audit/*`)
+- [ ] UI-004: New UI strings included in i18n files; language toggle updates enhancement UI
+- [ ] UI-005: PowerShell demo scripts and smoke tests pass in both standard and enhanced modes
+
+Cross-references:
+- Implementation plan updates: see `docs/plan.md` (Milestone 8: UI Enhancements)
+- Tasks: see `docs/tasks.md` (M8 breakdown)
+- Developer guide: `docs/ui-guide.md`
+- Accessibility checklist: `docs/accessibility.md`
+- Responsive guide: `docs/responsive.md`
 
 ## Execution Status
 

@@ -1,6 +1,6 @@
 # Good Neighbor Portal Development Constitution
 
-**Version:** 1.0.0  
+**Version:** 1.1.0  
 **Ratification Date:** 2025-09-27  
 **Last Amended Date:** 2025-09-27  
 
@@ -49,12 +49,20 @@ We are building the "Good Neighbor Portal" prototype for West Central Sanitation
 - **Testing:** Include 1-2 fast unit tests with new code
 - **Scripts:** PowerShell and Bash variants required
 
+### UI Enhancement Standards (New)
+- Progressive Enhancement: Default to a fully functional standard mode. Enhanced mode is optional and must not gate core flows.
+- No External Frameworks: Enhancements MUST be implemented with vanilla JS and CSS. No build steps or third-party UI libraries.
+- Stability: Do not rename/remove DOM ids referenced by demo scripts and tests.
+- Toggle Persistence: Store UI mode in `localStorage` with clear key naming (`uiMode`).
+- Accessibility: All enhancements MUST maintain or improve accessibility; no regression allowed.
+
 ### Code Quality
 - Self-documenting code with minimal comments
 - Functions under 20 lines when possible  
 - Type hints for all PHP functions
 - Input validation for all user-facing endpoints
 - Conventional Commits with informative scopes
+	- Example scopes: `feat(ui)`, `fix(a11y)`, `docs(ui)`, `chore(audit)`
 
 ### File Organization
 ```
@@ -127,6 +135,14 @@ Generate production code following technical standards. Include tests, documenta
 - [ ] Security checklist completed
 - [ ] Mobile responsiveness verified
 - [ ] Multi-language support functional
+ - [ ] Accessibility validated against WCAG 2.1 AA (see `docs/accessibility.md`)
+ - [ ] Progressive enhancement verified (standard and enhanced modes)
+
+### Responsive Testing Checklist
+- Test breakpoints: xs (<480), sm (480–767), md (768–1023), lg (1024–1439), xl (≥1440)
+- Verify no horizontal scroll, readable typography, and adequate spacing
+- Ensure tap targets ≥ 44px and focus visibility at all breakpoints
+- Validate layout for #login, #dashboard, and #staff routes
 
 ## Governance
 
