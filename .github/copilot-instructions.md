@@ -107,17 +107,7 @@ pwsh -File .specify/scripts/powershell/setup.ps1
 ```bash
 # Manual setup that always works:
 cp config/app.example.env config/app.env
-php -r "
-require_once 'src/Lib/Config.php';
-require_once 'src/Lib/Db.php';
-use GNP\Lib\Config;
-use GNP\Lib\Db;
-\$config = new Config();
-\$db = new Db(\$config);
-\$db->migrate('data/schema.sql');
-\$db->seed('data/seed.sql');
-echo 'Database setup complete\n';
-"
+php tools/setup.php
 ```
 
 ### Development Server
