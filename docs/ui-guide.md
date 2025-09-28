@@ -52,3 +52,9 @@ body.enhanced .card { box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
 - Run tools/web-audit.mjs in both modes; attach artifacts.
 - Run tests/smoke.ps1 in both modes.
 - Ensure phpstan passes (no new PHP changes).
+
+## Demo Banner (Dismissible + i18n)
+- Markup lives near the top of `public/index.html` as a region with `role="region"` and an i18n’d `aria-label`.
+- Message text and dismiss button label are i18n’d (`demoBanner`, `demoBannerAria`, `dismissAria`).
+- Visibility persists via `localStorage` key `demoBannerDismissed`.
+- Styles are inline for portability; keep contrast sufficient (meets AA).

@@ -99,6 +99,24 @@ async function run() {
       writeJSON(path.join(outDir, `i18n-check-${ts}.json`), { uiMode: uiMode || 'default', error: String(e) });
     }
 
+    // Responsive sweep: common breakpoints
+    try {
+      const breakpoints = [
+        { name: 'xs-375', width: 375, height: 667 },
+        { name: 'sm-640', width: 640, height: 800 },
+        { name: 'md-768', width: 768, height: 900 },
+        { name: 'lg-1024', width: 1024, height: 900 },
+        { name: 'xl-1280', width: 1280, height: 900 }
+      ];
+      for (const bp of breakpoints) {
+        await page.setViewportSize({ width: bp.width, height: bp.height });
+        await page.waitForTimeout(200);
+        await page.screenshot({ path: path.join(outDir, `responsive-${bp.name}-${ts}.png`), fullPage: true });
+      }
+      // Restore default
+      await page.setViewportSize({ width: 1366, height: 768 });
+    } catch {}
+
     // Mobile emulation (iPhone 12)
     const iPhone = devices['iPhone 12'];
     if (iPhone) {

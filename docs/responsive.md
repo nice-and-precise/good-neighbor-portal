@@ -7,6 +7,15 @@ Breakpoints (mobile-first):
 - lg: 1024–1439px
 - xl: ≥ 1440px
 
+Automated sweep in CI captures screenshots at:
+- 375x667 (xs-375)
+- 640x800 (sm-640)
+- 768x900 (md-768)
+- 1024x900 (lg-1024)
+- 1280x900 (xl-1280)
+
+Artifacts are saved under artifacts/web-audit/ with file names responsive-<breakpoint>-<timestamp>.png.
+
 Targets:
 - No horizontal scrolling
 - Tap targets ≥ 44px

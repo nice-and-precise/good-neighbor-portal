@@ -114,5 +114,9 @@
   "demoOnlyTitle": "Solo demostración"
   ,
   "sessionCookieMissing": "Falta la cookie de sesión. Si está viendo en una vista previa integrada, ábralo en su navegador del sistema para obtener la funcionalidad completa.",
-  "staffKeyPlaceholder": "demo-staff"
+  "staffKeyPlaceholder": "demo-staff",
+  "demoBanner": "Este es un entorno de demostración. Los datos son solo de muestra.",
+  "demoBannerAria": "Banner de demostración",
+  "dismissAria": "Cerrar",
+  "demoPaymentReceipt": "Recibo de pago de demostración"
 }

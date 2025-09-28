@@ -54,7 +54,11 @@
   </style>
 </head>
 <body>
-  <a class="skip-link" href="#main">Skip to main content</a>
+  <a class="skip-link" href="#main" data-i18n="skipToContent">Skip to main content</a>
+  <div id="demo-banner" role="region" aria-label="Demo banner" data-i18n-aria-label="demoBannerAria" style="display:none;background:#fff8e1;border:1px solid #f0d48a;padding:.5rem 2rem .5rem .75rem;border-radius:.35rem;position:relative;margin-bottom:.5rem">
+    <span data-i18n="demoBanner">This is a demo environment. Data is sample only.</span>
+    <button id="demo-banner-close" type="button" aria-label="Dismiss" data-i18n-aria-label="dismissAria" style="position:absolute;right:.5rem;top:.35rem;border:1px solid #cc9e2f;background:#f8de8a;color:#4a3a04;border-radius:.25rem;padding:.2rem .45rem;line-height:1">×</button>
+  </div>
   <h1 data-i18n="title">Good Neighbor Portal</h1>
   <p class="note" data-i18n="scaffoldReady">Scaffold ready. Use the scripts to setup and run the app.</p>
   <main id="main">
@@ -64,7 +68,7 @@
       <select id="tenant"></select>
     </label>
     <label><span data-i18n="emailLabel">Email</span>
-      <input id="email" type="email" autocomplete="email" placeholder="you@example.com" />
+      <input id="email" type="email" autocomplete="email" placeholder="you@example.com" data-i18n-placeholder="emailPlaceholder" />
     </label>
     <button id="request" type="button" data-i18n="requestMagicLink">Request magic link (demo shows token)</button>
     <label><span data-i18n="tokenLabel">Token</span>
@@ -128,7 +132,7 @@
         </div>
         <div class="col">
           <div id="staff-queue" class="card">
-            <h3 style="margin-top:0"><span data-i18n="staffQueue">Staff Queue (Demo)</span> <span class="badge" title="Demo only" data-i18n="demoOnly">DEMO ONLY</span></h3>
+            <h3 style="margin-top:0"><span data-i18n="staffQueue">Staff Queue (Demo)</span> <span class="badge" title="Demo only" data-i18n="demoOnly" data-i18n-title="demoOnlyTitle">DEMO ONLY</span></h3>
               <label><span data-i18n="staffHeaderKey">Staff header key</span> <input id="queue-staff-key" type="text" placeholder="demo-staff" data-i18n-placeholder="staffKeyPlaceholder" /></label>
             <label><span data-i18n="statusLabel">Status</span>
               <select id="queue-status">
@@ -150,9 +154,9 @@
         <div class="col">
           <div id="i18n" class="card">
             <h3 style="margin-top:0" data-i18n="language">Language</h3>
-            <div role="group" aria-label="Language toggle">
-              <button type="button" data-lang="en" aria-pressed="true">English</button>
-              <button type="button" data-lang="es" aria-pressed="false">Español</button>
+            <div role="group" aria-label="Language toggle" data-i18n-aria-label="languageToggle">
+              <button type="button" data-lang="en" aria-pressed="true" data-i18n="langEnglish">English</button>
+              <button type="button" data-lang="es" aria-pressed="false" data-i18n="langSpanish">Español</button>
             </div>
             <div id="i18n-status" class="muted" style="margin-top:.25rem"></div>
           </div>

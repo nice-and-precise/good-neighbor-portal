@@ -55,6 +55,21 @@
       $('#status').textContent = '';
       await loadI18n();
       applyI18n();
+      // Demo banner: show once until dismissed
+      try {
+        const dismissed = localStorage.getItem('demoBannerDismissed') === '1';
+        const banner = document.getElementById('demo-banner');
+        const closeBtn = document.getElementById('demo-banner-close');
+        if (banner && !dismissed) {
+          banner.style.display = '';
+        }
+        if (closeBtn) {
+          closeBtn.addEventListener('click', () => {
+            localStorage.setItem('demoBannerDismissed', '1');
+            if (banner) banner.style.display = 'none';
+          });
+        }
+      } catch {}
   // Apply persisted UI mode early
   let persisted = 'standard';
   try { persisted = localStorage.getItem(UI_MODE_KEY) || 'standard'; } catch {}
@@ -329,7 +344,7 @@
         if (list) {
           const li = document.createElement('li');
           const now = new Date().toISOString().slice(0, 19).replace('T',' ');
-          li.innerHTML = `${now}: Demo payment receipt <strong>${money(res.amount_cents)}</strong>`;
+          li.innerHTML = `${now}: ${t('demoPaymentReceipt','Demo payment receipt')} <strong>${money(res.amount_cents)}</strong>`;
           list.insertBefore(li, list.firstChild);
         }
       } catch {}
@@ -418,7 +433,15 @@
       i18n.strings = await res.json();
     } catch { i18n.strings = {}; }
   }
-  function t(key, fallback) { return i18n.strings[key] || fallback || key; }
+  function t(key, fallback, vars) {
+    let s = i18n.strings[key] || fallback || key;
+    if (vars && s && typeof s === 'string') {
+      for (const [k, v] of Object.entries(vars)) {
+        s = s.replaceAll(`{${k}}`, String(v));
+      }
+    }
+    return s;
+  }
   function showToast(message, kind = 'info') {
     const el = document.getElementById('toast');
     if (!el) return;
@@ -456,6 +479,13 @@
       const val = t(key, el.getAttribute('aria-label') || '');
       if (val) el.setAttribute('aria-label', val);
     });
+    // Update banner visibility if content changes language
+    try {
+      const banner = document.getElementById('demo-banner');
+      if (banner && localStorage.getItem('demoBannerDismissed') !== '1') {
+        banner.style.display = '';
+      }
+    } catch {}
     // Mark active language toggle button via aria-pressed
     try {
       const group = document.querySelector('#i18n [role="group"]');

@@ -112,7 +112,7 @@ Alignment status (2025‑09‑27):
 - M5: Implemented (staff transitions + notes + queue list)
 - M6: Implemented (route summary + CSV export)
 - M7: Implemented (i18n + toggle + smoke/unit tests)
-- M8: Planned (progressive enhancement system; responsive polish; WCAG 2.1 AA)
+- M8: In progress (progressive enhancement system implemented; responsive polish under validation; WCAG 2.1 AA checks passing in audit)
 
 ## 11.1) Milestone 8 — UI Enhancements
 

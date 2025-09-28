@@ -140,25 +140,25 @@ graph TB
 
 ## ✨ Key Features
 
-```mermaid
-mindmap
-  root((Good Neighbor Portal))
-    Residents
-      Service Requests
-      Billing Management
-      Schedule Viewing
-      Multi-Language
-    Staff
-      Request Queue
-      Route Management
-      Customer Notes
-      Status Updates
-    Technical
-      Multi-Tenant
-      Mobile Responsive
-      Offline Capable
-      Accessibility
-```
+To maximize readability and accessibility, this section uses high-contrast text instead of a low-contrast diagram.
+
+• Residents
+   - Service Requests: create and track requests
+   - Billing Management: view charges and make demo payments
+   - Schedule Viewing: next pickup and service windows
+   - Multi‑Language: English and Spanish toggle
+
+• Staff
+   - Request Queue: triage and manage workflow
+   - Route Management: overview and CSV export
+   - Customer Notes: add internal notes and updates
+   - Status Updates: acknowledge, in‑progress, done, cancelled
+
+• Technical
+   - Multi‑Tenant: neighborhood‑scoped data isolation
+   - Mobile Responsive: tap targets ≥44px, no horizontal scroll
+   - Offline Capable: demo flows function without network
+   - Accessibility: WCAG 2.1 AA targets with audit artifacts
 
 ### 🏠 Resident Features
 - **📅 Service Scheduling**: View pickup schedules and service windows
@@ -275,14 +275,12 @@ graph LR
 
 ---
 
-### 🔼 UI Enhancements (Feature Branch)
+### 🔼 UI Enhancements (Milestone 8)
 
 - Spec additions: `docs/spec.md` (UI-001..UI-005)
 - Plan milestone: `docs/plan.md` (Milestone 8)
 - Tasks breakdown: `docs/tasks.md` (M8)
 - Developer guides: `docs/ui-guide.md`, `docs/accessibility.md`, `docs/responsive.md`
-
-Changes are being developed on `feature/ui-enhancements` to avoid impacting `main` until validated.
 
 ## 🎯 Getting Started Workflows
 
@@ -399,9 +397,9 @@ Choose your path based on your role:
 
 <div align="center">
 
-### 🏗️ Current Milestone: **M3 - Resident Dashboard + Billing**
+### 🏗️ Current Milestone: **M8 — UI Enhancements (Progressive/Responsive/Accessibility)**
 
-![Progress](https://progress-bar.xyz/75/?scale=100&title=Progress&width=400&color=babaca&suffix=%)
+![Progress](https://progress-bar.xyz/90/?scale=100&title=Progress&width=400&color=4c7aff&suffix=%)
 
 </div>
 
@@ -409,11 +407,12 @@ Choose your path based on your role:
 |:----------|:-------|:---------|
 | ✅ **M1** | Complete | Scaffold + DB + Scripts |
 | ✅ **M2** | Complete | Auth + Neighborhood Switcher |
-| 🚧 **M3** | In Progress | Resident Dashboard + Billing |
-| 📋 **M4** | Planned | Service Requests + Confirmations |
-| 📋 **M5** | Planned | Staff Queue + Notes + Polling |
-| 📋 **M6** | Planned | Route Summary + CSV Export |
-| 📋 **M7** | Planned | i18n + Toggle + Tests |
+| ✅ **M3** | Complete | Resident Dashboard + Billing |
+| ✅ **M4** | Complete | Service Requests + Confirmations |
+| ✅ **M5** | Complete | Staff Queue + Notes + Polling |
+| ✅ **M6** | Complete | Route Summary + CSV Export |
+| ✅ **M7** | Complete | i18n + Toggle + Tests |
+| 🚧 **M8** | In Progress | Progressive Enhancement + Responsive + Accessibility |
 
 ### 🧪 Quality Metrics
 
@@ -435,21 +434,24 @@ Choose your path based on your role:
 
 ---
 
-*Last updated: 2024-12-19 | Built with [Spec Kit](https://github.com/specify-kit) methodology*
+*Last updated: 2025-09-27 | Built with [Spec Kit](https://github.com/specify-kit) methodology*
 
 </div>
 
 ---
 
-## 🔼 UI Enhancements (Feature Branch)
+## 🔼 UI Enhancements (Milestone 8)
 
-Developed on `feature/ui-enhancements` to avoid impacting `main` until validated.
+Tracked under Milestone 8: progressive enhancement, responsive polish, and accessibility improvements.
 
 What’s included:
 - Progressive UI toggle with persistence (`localStorage` key `uiMode`) and i18n labels
 - Enhancement styles scoped under `body.enhanced` (standard mode unchanged)
 - Web audit support for enhanced mode with an npm alias
 - PowerShell compatibility fix for the deterministic payment test
+ - Dismissible demo banner with i18n and persistence
+ - Attribute-level i18n (placeholder, title, aria-label)
+ - Responsive screenshot sweep at xs–xl breakpoints in web audits
 
 Try it locally:
 

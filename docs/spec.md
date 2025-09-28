@@ -82,11 +82,14 @@ West Central Sanitation needs a demo-ready MVP portal that runs entirely on a de
 - [x] Dependencies and assumptions identified
 
 ### UI Enhancements Validation
-- [ ] UI-001: Toggle persists across reloads (localStorage) and can be changed without breaking hash routing
+- [x] UI-001: Toggle persists across reloads (localStorage) and can be changed without breaking hash routing
 - [ ] UI-002: No horizontal scroll on xs–xl; tap targets ≥ 44px; forms and cards reflow cleanly
-- [ ] UI-003: WCAG 2.1 AA checklist passes; audit artifacts attached (see `artifacts/web-audit/*`)
-- [ ] UI-004: New UI strings included in i18n files; language toggle updates enhancement UI
-- [ ] UI-005: PowerShell demo scripts and smoke tests pass in both standard and enhanced modes
+- [x] UI-003: WCAG 2.1 AA checklist passes; audit artifacts attached (see `artifacts/web-audit/*`)
+- [x] UI-004: New UI strings included in i18n files; language toggle updates enhancement UI
+- [x] UI-005: PowerShell demo scripts and smoke tests pass in both standard and enhanced modes
+
+Notes:
+- UI-002 remains to be validated exhaustively across all breakpoints (xs–xl). Current CSS includes mobile-first layout, 44px tap targets, and focus-visible styling, but a full per-breakpoint verification is pending.
 
 Cross-references:
 - Implementation plan updates: see `docs/plan.md` (Milestone 8: UI Enhancements)

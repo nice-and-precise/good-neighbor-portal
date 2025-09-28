@@ -114,5 +114,10 @@
   "demoOnlyTitle": "Demo only"
   ,
   "sessionCookieMissing": "Session cookie missing. If you are viewing in an embedded preview, open in your system browser for full login functionality.",
-  "staffKeyPlaceholder": "demo-staff"
+  "staffKeyPlaceholder": "demo-staff",
+  "demoBanner": "This is a demo environment. Data is sample only.",
+  "demoBannerAria": "Demo banner",
+  "dismissAria": "Dismiss"
+  ,
+  "demoPaymentReceipt": "Demo payment receipt"
 }
