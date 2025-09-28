@@ -233,7 +233,7 @@ pwsh -File tests/pay-deterministic.ps1 -Base "http://127.0.0.1:8080"
 - `residents`, `schedules`, `billing`, `requests`, `routes`, `route_stats`
 
 ### API Endpoints Structure
-**All endpoints** in `/public/api/` (10 endpoints):
+**All endpoints** in `/public/api/` (20+ endpoints; see detailed list below):
 
 **Core System:**
 - `ping.php`: Health check, returns `{"ok":true,"env":"dev"}`
