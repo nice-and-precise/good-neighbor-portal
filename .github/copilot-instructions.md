@@ -39,10 +39,13 @@ git push --force-with-lease origin main
 ```
 
 ## Quality Gates (All Workflows)
-1. Local validation: `./tools/audit-runner.ps1` 
-2. Conventional commit with scope
-3. PHPStan passes: `./vendor/bin/phpstan analyse`
-4. Update docs if behavior changes
+1. **Local validation**: `pwsh -File tools/audit-runner.ps1`
+2. **Smoke tests**: `pwsh -File tests/smoke.ps1 -Base "http://127.0.0.1:8080"`
+3. **Unit tests**: `php tests/unit/validator_test.php`
+4. **Payment logic**: `pwsh -File tests/pay-deterministic.ps1 -Base "http://127.0.0.1:8080"`
+5. **Conventional commit** with scope: `feat(api):`, `fix(ui):`, `docs(setup):`
+6. **PHPStan passes**: `./vendor/bin/phpstan analyse` (if Composer installed)
+7. **Update docs** if behavior changes
 
 ## Scopes
 Use: `auth`, `billing`, `dashboard`, `api`, `ui`, `db`, `docs`, `ci`, `config`, `audit`, `i18n`, `staff`, `tenant`, `export`, `test`
@@ -66,20 +69,25 @@ The Good Neighbor Portal is a **PHP 8.1+ web application** built as a demo-ready
 This repository follows **Spec-Kit workflow** with comprehensive documentation:
 
 **Core Documentation** (`docs/`):
-- `constitution.md`: Development principles and coding standards
+- `constitution.md`: Development principles and coding standards  
 - `spec.md`: Feature specifications and user scenarios  
-- `plan.md`: Complete 7-milestone implementation roadmap
-- `tasks.md`: Detailed implementation tasks by milestone
-- `decisions.md`: Architectural decisions (auth, tenancy, PII, etc.)
-- `analyze.md`: Cross-artifact analysis and alignment validation
-- `clarify.md`: Clarification questions and answers
+- `plan.md`: Complete 7-milestone implementation roadmap  
+- `tasks.md`: Detailed implementation tasks by milestone  
+- `decisions.md`: Architectural decisions (auth, tenancy, PII, etc.)  
+- `analyze.md`: Cross-artifact analysis and alignment validation  
+- `clarify.md`: Clarification questions and answers  
+- `ARCHITECTURE.md`, `API.md`, `DEVELOPMENT.md`: Technical documentation  
+- `USER-GUIDE.md`, `DEPLOYMENT.md`: User and ops documentation  
 
 **Spec-Kit Templates** (`.specify/templates/`):
-- `spec-template.md`, `plan-template.md`, `tasks-template.md`
-- `agent-file-template.md` for multi-agent context
+- `spec-template.md`, `plan-template.md`, `tasks-template.md`  
+- `agent-file-template.md` for multi-agent context  
 
 **Copilot Slash Commands** (`.github/prompts/`):
 - `/constitution`, `/specify`, `/clarify`, `/plan`, `/tasks`, `/analyze`, `/implement`  
+
+**Active Features** (`specs/`):
+- `001-autonomous-audit/`: Comprehensive audit system implementation  
 
 ## Build & Validation Commands
 
@@ -94,17 +102,25 @@ This repository follows **Spec-Kit workflow** with comprehensive documentation:
 pwsh -File .specify/scripts/powershell/setup.ps1
 
 # Alternative if PowerShell extension loading fails:
-SEED_DEMO=true SCHEMA_PATH=./data/schema.sql SEED_PATH=./data/seed.sql php tmp/migrate.php
+./.specify/scripts/bash/setup.sh
 ```
 
 **CRITICAL WORKAROUND**: The PowerShell setup script **WILL FAIL** with PHP extension loading errors in CI/Linux environments due to incorrect extension directory paths. **ALWAYS use the manual alternative**:
 
 ```bash
 # Manual setup that always works:
-mkdir -p tmp
-# Run the migration script to set up the database
-php tmp/migrate.php
 cp config/app.example.env config/app.env
+php -r "
+require_once 'src/Lib/Config.php';
+require_once 'src/Lib/Db.php';
+use GNP\Lib\Config;
+use GNP\Lib\Db;
+\$config = new Config();
+\$db = new Db(\$config);
+\$db->migrate('data/schema.sql');
+\$db->seed('data/seed.sql');
+echo 'Database setup complete\n';
+"
 ```
 
 ### Development Server
@@ -120,8 +136,15 @@ php -S 127.0.0.1:8080 -t public
 ```bash
 # Manual reset (ALWAYS WORKS):
 rm -f data/app.db
-php tmp/migrate.php  # if migrate.php exists from setup
-# OR recreate migrate.php with setup code above
+cp config/app.example.env config/app.env
+php -r "
+require_once 'src/Lib/Config.php'; 
+require_once 'src/Lib/Db.php';
+use GNP\Lib\Config; use GNP\Lib\Db;
+\$config = new Config(); \$db = new Db(\$config);
+\$db->migrate('data/schema.sql'); \$db->seed('data/seed.sql');
+echo 'Database reset complete\n';
+"
 
 # PowerShell reset (may fail with extension errors):
 pwsh -File .specify/scripts/powershell/reset-demo.ps1 -Force
@@ -130,14 +153,18 @@ pwsh -File .specify/scripts/powershell/reset-demo.ps1 -Force
 ### Testing & Validation
 ```powershell
 # Test authentication flow (requires running server)
-pwsh -File .specify/scripts/powershell/test-auth.ps1 -Email "jane@example.com" -Base "http://127.0.0.1:8080"
+pwsh -File tests/smoke.ps1 -Base "http://127.0.0.1:8080"
+
+# Quality gates and comprehensive audit
+pwsh -File tools/audit-runner.ps1
 
 # Quick API test
 curl http://127.0.0.1:8080/api/ping.php
 curl http://127.0.0.1:8080/api/diag.php  # PHP extension diagnostics
 
-# Export placeholder CSV (M1 implementation)
-pwsh -File .specify/scripts/powershell/export.ps1 -Out ./exports/route-summary.csv
+# Unit tests
+php tests/unit/validator_test.php
+pwsh -File tests/pay-deterministic.ps1 -Base "http://127.0.0.1:8080"
 ```
 
 **Build time expectations**:
@@ -148,10 +175,10 @@ pwsh -File .specify/scripts/powershell/export.ps1 -Out ./exports/route-summary.c
 - Database reset: 3-5 seconds
 
 **Critical Setup Sequence** (validated working):
-1. Manual database setup (above code block)
-2. Copy config: `cp config/app.example.env config/app.env` 
-3. Start server: `php -S 127.0.0.1:8080 -t public`
-4. Test: `curl http://127.0.0.1:8080/api/ping.php`
+1. Manual database setup: `cp config/app.example.env config/app.env` and run PHP setup code above
+2. Start server: `php -S 127.0.0.1:8080 -t public`
+3. Test: `curl http://127.0.0.1:8080/api/ping.php`
+4. Full validation: `pwsh -File tests/smoke.ps1 -Base "http://127.0.0.1:8080"`
 
 ## Project Architecture & Layout
 
@@ -168,10 +195,12 @@ pwsh -File .specify/scripts/powershell/export.ps1 -Out ./exports/route-summary.c
 ./
 ├── .github/
 │   ├── copilot-instructions.md   # This file
-│   └── prompts/                  # Copilot slash commands (7 files)
+│   ├── instructions/             # Agent instructions
+│   └── prompts/                  # Copilot slash commands (8 files)
 ├── .specify/                     # Spec-Kit workflow system
 │   ├── memory/constitution.md    # Spec-Kit constitution copy
 │   ├── scripts/powershell/       # 10 PowerShell automation scripts
+│   ├── scripts/bash/             # Bash equivalents (setup.sh)
 │   └── templates/                # 4 spec-kit templates
 ├── config/
 │   ├── app.env                   # Local environment config (gitignored)
@@ -180,14 +209,23 @@ pwsh -File .specify/scripts/powershell/export.ps1 -Out ./exports/route-summary.c
 │   ├── schema.sql                # Multi-tenant SQLite schema
 │   ├── seed.sql                  # Demo data (Willmar, MN tenant)
 │   └── app.db                    # SQLite database (gitignored)
-├── docs/                         # Spec-driven documentation (7 files)
+├── docs/                         # Spec-driven documentation (22 files)
+├── specs/                        # Active feature development
+│   └── 001-autonomous-audit/     # Comprehensive audit system
 ├── public/                       # Web root (no build artifacts)
-│   ├── api/                      # 8 PHP API endpoints
+│   ├── api/                      # 20+ PHP API endpoints
 │   ├── index.php                 # Entry point/fallback  
 │   ├── index.html                # Main SPA template
 │   └── app.js                    # Frontend JavaScript (~80 lines)
 ├── src/
 │   └── Lib/                      # Core PHP libraries (5 classes)
+├── tests/                        # Test infrastructure
+│   ├── smoke.ps1                 # Full workflow validation
+│   ├── pay-deterministic.ps1     # Payment logic test
+│   └── unit/                     # PHP unit tests
+├── tools/                        # Development and audit tools
+│   ├── audit-runner.ps1          # Comprehensive quality gates
+│   └── web-audit-enhanced.cjs    # Web audit tooling
 ├── logs/                         # Application logs (gitignored)
 ├── tmp/                          # Temporary files (gitignored)
 └── exports/                      # CSV exports (gitignored)
@@ -208,26 +246,61 @@ pwsh -File .specify/scripts/powershell/export.ps1 -Out ./exports/route-summary.c
 - `residents`, `schedules`, `billing`, `requests`, `routes`, `route_stats`
 
 ### API Endpoints Structure
-**All endpoints** in `/public/api/`:
+**All endpoints** in `/public/api/` (20+ endpoints):
+
+**Core System:**
 - `ping.php`: Health check, returns `{"ok":true,"env":"dev"}`
 - `diag.php`: PHP extension diagnostics (PDO, SQLite status)
 - `csrf.php`: CSRF token generation
+
+**Authentication & Session:**
 - `auth_request.php`: Magic-link authentication request
 - `auth_verify.php`: Magic-link token verification  
 - `session.php`: Current session information
-- `tenants.php`: Multi-tenant neighborhood switching
 - `logout.php`: Session termination
+
+**Multi-tenancy:**
+- `tenants.php`: Multi-tenant neighborhood switching
+
+**Resident Dashboard:**
+- `dashboard.php`: Main resident dashboard data
+- `billing_get.php`: Billing history and details
+- `recent_activity.php`: Recent activity feed
+
+**Service Requests:**
+- `request_create.php`: Create new service request
+- `request_get.php`: Get request details
+- `request_notes.php`: Request notes and history
+- `request_note_create.php`: Add notes to requests
+- `request_status_update.php`: Update request status
+
+**Payment & Billing:**
+- `pay_demo.php`: Deterministic payment demo
+
+**Staff Operations:**
+- `staff_queue.php`: Staff queue management
+- `route_summary.csv.php`: CSV export for routes
+
+**Internationalization:**
+- `i18n_switch.php`: Language switching
+
+**Diagnostics:**
+- `cookie_diag.php`: Cookie and session diagnostics
 
 ## Validation & CI Pipeline
 
 ### Pre-commit Validation
-**NO FORMAL CI PIPELINE EXISTS**. **NO LINTING TOOLS CONFIGURED**. Manual validation only:
+**Quality Gates Available**:
 
 1. **Database integrity**: Verify `data/app.db` exists and contains seeded data
 2. **Server startup**: Confirm `php -S 127.0.0.1:8080 -t public` starts without errors  
-3. **API accessibility**: Test `curl http://127.0.0.1:8080/api/ping.php` returns `{"ok":true,"env":"dev"}`
-4. **Authentication flow**: Run `test-auth.ps1` script against running server
-5. **Manual testing**: Load http://127.0.0.1:8080 in browser, test magic-link flow
+3. **API accessibility**: Test all 20+ endpoints via comprehensive test suite
+4. **Authentication flow**: Run `tests/smoke.ps1` script against running server
+5. **Payment logic**: Run `tests/pay-deterministic.ps1` for deterministic billing
+6. **Unit tests**: Execute PHP unit tests in `tests/unit/`
+7. **Comprehensive audit**: Run `tools/audit-runner.ps1` for full quality gates
+8. **Web audit**: Enhanced web audit tooling for accessibility and performance
+9. **Manual testing**: Load http://127.0.0.1:8080 in browser, test full workflow
 
 ### Development Principles (from docs/constitution.md)
 - **Principle 1**: Pragmatic clarity over cleverness
@@ -270,21 +343,35 @@ pwsh -File .specify/scripts/powershell/export.ps1 -Out ./exports/route-summary.c
 
 The project follows a **7-milestone implementation plan** (from docs/plan.md):
 
-- **M1**: Scaffold + DB + scripts ✅ **CURRENT STATE**
-- **M2**: Magic-link auth + neighborhood switcher  
-- **M3**: Resident dashboard + billing demo
-- **M4**: Service requests + confirmations
-- **M5**: Staff queue + polling + notes
-- **M6**: Route summary + CSV export
-- **M7**: i18n + toggle + smoke tests
+- **M1**: Scaffold + DB + scripts ✅ **COMPLETED**
+- **M2**: Magic-link auth + neighborhood switcher ✅ **COMPLETED**
+- **M3**: Resident dashboard + billing demo ✅ **COMPLETED**
+- **M4**: Service requests + confirmations ✅ **COMPLETED**
+- **M5**: Staff queue + polling + notes ✅ **COMPLETED**
+- **M6**: Route summary + CSV export ✅ **COMPLETED**
+- **M7**: i18n + toggle + smoke tests ✅ **COMPLETED**
 
-### M1 Implementation Status ✅
+### M1-M7 Implementation Status ✅ **ALL COMPLETED**
 ✅ Multi-tenant SQLite schema (tenants, users, neighborhoods, etc.)  
 ✅ Core library classes: Config, Db, Util, Validator, Http  
-✅ Basic API endpoints: ping, csrf, diag, auth_request, auth_verify, session, tenants, logout  
-✅ PowerShell automation scripts (with known extension loading issues)  
-✅ Manual setup procedures validated and documented  
-✅ Demo data for Willmar, MN tenant with 3 neighborhoods, sample users
+✅ Full API endpoints: 20+ endpoints covering all user workflows  
+✅ Magic-link authentication with session management  
+✅ Resident dashboard with billing history and service requests  
+✅ Staff queue management with notes and status updates  
+✅ CSV export functionality for route summaries  
+✅ Internationalization (English + Spanish) with runtime switching  
+✅ Comprehensive test suite (smoke tests, unit tests, deterministic billing)  
+✅ Quality gates and audit tooling  
+✅ PowerShell automation scripts with Bash alternatives  
+✅ Demo data for Willmar, MN tenant with full workflow coverage  
+
+### Current Development State ✅ **PRODUCTION READY**
+The project is now in **M7+ polish phase** with advanced features:
+- Autonomous audit system (specs/001-autonomous-audit/)
+- Comprehensive quality gates and CI tooling
+- Enhanced web audit capabilities
+- Full internationalization coverage
+- Complete API coverage for all specified workflows
 
 ### Key Architecture Decisions (from docs/decisions.md)
 1. **Identity model**: Magic-link simulation (token displayed in UI, no email)
@@ -302,10 +389,11 @@ The project follows a **7-milestone implementation plan** (from docs/plan.md):
 - `README.md`: Basic setup instructions with PowerShell commands
 - `.gitignore`: Excludes config/app.env, data/app.db, logs/, tmp/, exports/
 
-### Documentation Files (21 total .md files)
-**Core Spec-Kit docs** (docs/): constitution.md, spec.md, plan.md, tasks.md, decisions.md, analyze.md, clarify.md  
-**Copilot prompts** (.github/prompts/): 7 slash command files  
+### Documentation Files (35+ total .md files)
+**Core Spec-Kit docs** (docs/): constitution.md, spec.md, plan.md, tasks.md, decisions.md, analyze.md, clarify.md, plus ARCHITECTURE.md, API.md, DEVELOPMENT.md, etc.  
+**Copilot prompts** (.github/prompts/): 8 slash command files  
 **Templates** (.specify/templates/): 4 spec-kit templates  
+**Active specs** (specs/): 001-autonomous-audit/ with spec.md, plan.md, tasks.md  
 **This file**: .github/copilot-instructions.md  
 
 ## Key Files Reference
@@ -322,9 +410,9 @@ The project follows a **7-milestone implementation plan** (from docs/plan.md):
 - `create-new-feature.ps1`: Spec-Kit feature creation
 - `setup-plan.ps1`: Plan setup utilities
 
-### PHP Source Files - 13 files
+### PHP Source Files - 25+ files
 **Libraries** (src/Lib/): Config.php, Db.php, Http.php, Util.php, Validator.php  
-**API endpoints** (public/api/): 8 PHP files as listed above  
+**API endpoints** (public/api/): 20+ PHP files covering all workflows  
 **Entry points** (public/): index.php (fallback), index.html (SPA), app.js (frontend)
 
 ## Key Files for Code Changes
@@ -346,21 +434,28 @@ The project follows a **7-milestone implementation plan** (from docs/plan.md):
 
 ## Troubleshooting Guide
 
-### PowerShell Script Failures ⚠️ **CRITICAL ISSUE**
+### PowerShell Script Failures ⚠️ **KNOWN ISSUE**
 **Symptom**: Setup/run scripts fail with massive PHP extension loading errors  
 **Root Cause**: Scripts try to override extension_dir with incorrect paths  
-**Solution**: **ALWAYS use manual PHP commands** documented above
+**Solution**: Use manual PHP commands or Bash alternatives (`.specify/scripts/bash/setup.sh`)
 
 ### Database Issues
 **Missing database**: Run manual setup sequence  
 **Database locked**: Stop PHP server first: `pkill -f "php -S"`  
 **Permission errors**: Ensure write access to `data/` directory
+**Schema errors**: Check namespace usage (GNP\Lib, not GoodNeighbor\Lib)
 
 ### Server Issues  
 **Port conflicts**: Use different port: `php -S 127.0.0.1:8081 -t public`  
 **Server won't start**: Check PHP extensions: `php -m | grep sqlite`  
 **API errors**: Verify database exists and config/app.env is present
+**CSRF failures**: Ensure session_start() called before API requests
+
+### Quality Gate Issues
+**Audit failures**: Check `tools/audit-runner.ps1` output for specific issues
+**Test failures**: Use `-Base "http://127.0.0.1:8080"` parameter for running server tests
+**Unit test errors**: Ensure database is set up before running PHP unit tests
 
 ---
 
-**CRITICAL**: Trust these instructions and use the documented manual commands. The PowerShell scripts have fundamental issues in non-Windows environments. Manual PHP setup always works and takes less time than debugging script failures.
+**RECOMMENDATION**: Use Bash setup scripts (`.specify/scripts/bash/setup.sh`) for reliable cross-platform setup, or the documented manual PHP commands. The comprehensive test suite in `tests/` and quality gates in `tools/` provide robust validation.
