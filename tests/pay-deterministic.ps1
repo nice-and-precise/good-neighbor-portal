@@ -11,24 +11,43 @@ function Invoke-PostJson($url, $obj, $headers=@{}) {
   $json = $obj | ConvertTo-Json -Compress
   $resp = $null
   try {
-    $resp = Invoke-WebRequest -Uri $url -Method Post -Body $json -ContentType 'application/json' -Headers $headers -UseBasicParsing -WebSession $script:sess -ErrorAction Stop
+    $iwrParams = @{
+      Uri = $url
+      Method = 'Post'
+      Body = $json
+      ContentType = 'application/json'
+      Headers = $headers
+      WebSession = $script:sess
+      ErrorAction = 'Stop'
+    }
+    # Prefer not to throw on non-success HTTP status codes so we can inspect JSON bodies
+    $cmd = Get-Command Invoke-WebRequest -ErrorAction SilentlyContinue
+    if ($cmd -and $cmd.Parameters.ContainsKey('SkipHttpErrorCheck')) {
+      $iwrParams['SkipHttpErrorCheck'] = $true
+    }
+    $resp = Invoke-WebRequest @iwrParams
     return ($resp.Content | ConvertFrom-Json)
   } catch {
-    # Attempt to read the error response body (e.g., 4xx with JSON payload)
-    $ex = $_.Exception
-    if ($ex -and $ex.Response) {
+    # PowerShell Core often places response JSON in ErrorDetails.Message
+    $body = $null
+    if ($_.ErrorDetails -and $_.ErrorDetails.Message) {
+      $body = $_.ErrorDetails.Message
+    } elseif ($_.Exception -and $_.Exception.Response) {
       try {
-        $stream = $ex.Response.GetResponseStream()
+        $stream = $_.Exception.Response.GetResponseStream()
         $reader = New-Object System.IO.StreamReader($stream)
         $body = $reader.ReadToEnd()
         if ($reader) { $reader.Dispose() }
         if ($stream) { $stream.Dispose() }
-        if ($body) {
-          return ($body | ConvertFrom-Json)
-        }
       } catch {
-        # Fall through to rethrow
+        # ignore
       }
+    } elseif ($_.Exception -and $_.Exception.Message -match '^\{') {
+      # Some hosts include the raw JSON in the exception message
+      $body = $_.Exception.Message
+    }
+    if ($body) {
+      try { return ($body | ConvertFrom-Json) } catch { }
     }
     throw
   }
