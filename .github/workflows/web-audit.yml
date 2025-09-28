@@ -56,6 +56,14 @@ jobs:
           TARGET_URL: http://127.0.0.1:8080/
         shell: bash
 
+      - name: Run web audit script (enhanced mode)
+        run: |
+          node tools/web-audit.mjs
+        env:
+          TARGET_URL: http://127.0.0.1:8080/
+          UI_MODE: enhanced
+        shell: bash
+
       - name: Upload web audit artifacts
         uses: actions/upload-artifact@v4
         if: always()

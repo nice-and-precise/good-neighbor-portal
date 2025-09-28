@@ -78,9 +78,11 @@
   "loading": "Cargando…",
   "queueError": "Error de cola",
   "queueLoadFailed": "Error al cargar la cola",
+  "queueEmpty": "Sin elementos",
   "languageSet": "Idioma establecido",
   "langToggleFailed": "Error al cambiar el idioma",
   "loggedOut": "Sesión cerrada.",
+  "cookieHint": "Aviso: Su entorno puede estar bloqueando las cookies. El inicio de sesión puede fallar aquí. Ábralo en su navegador del sistema para obtener la funcionalidad completa.",
   "tokenHelp": "Para la demostración, el token se devuelve después de solicitar un enlace mágico.",
   "catBulkPickup": "Recolección a granel",
   "catContainerSwap": "Cambio de contenedor",
@@ -99,4 +101,6 @@
   "enhancedToggleLabel": "Interfaz mejorada",
   "uiModeEnhanced": "Modo mejorado activado",
   "uiModeStandard": "Modo estándar activado"
+  ,
+  "youAreViewing": "Está viendo:"
 }

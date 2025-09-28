@@ -78,9 +78,11 @@
   "loading": "Loading…",
   "queueError": "Queue error",
   "queueLoadFailed": "Queue load failed",
+  "queueEmpty": "No items",
   "languageSet": "Language set",
   "langToggleFailed": "Lang toggle failed",
   "loggedOut": "Logged out.",
+  "cookieHint": "Heads up: Your environment may be blocking cookies. Login may fail here. Open in your system browser for full functionality.",
   "tokenHelp": "For the demo, the token is returned after requesting a magic link.",
   "catBulkPickup": "Bulk pickup",
   "catContainerSwap": "Container swap",
@@ -99,4 +101,6 @@
   "enhancedToggleLabel": "Enhanced UI",
   "uiModeEnhanced": "Enhanced mode on",
   "uiModeStandard": "Standard mode on"
+  ,
+  "youAreViewing": "You're viewing:"
 }

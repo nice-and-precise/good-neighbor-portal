@@ -60,8 +60,8 @@
   try { persisted = localStorage.getItem(UI_MODE_KEY) || 'standard'; } catch {}
   applyUiMode(persisted);
       if (!cookieEnabled) {
-        // Provide a clear, non-blocking hint
-        const msg = 'Heads up: Your environment may be blocking cookies. Login may fail here. Open in your system browser for full functionality.';
+        // Provide a clear, non-blocking hint (localized)
+        const msg = t('cookieHint','Heads up: Your environment may be blocking cookies. Login may fail here. Open in your system browser for full functionality.');
         if (statusEl && !statusEl.textContent) statusEl.textContent = msg;
       }
     } catch (e) {
@@ -284,7 +284,7 @@
         const tns = await getJSON('/api/tenants.php');
         const active = tns.active || state.tenant;
         const found = (tns.tenants || []).find(t => t.slug === active);
-        $('#tenant-badge').textContent = `You're viewing: ${found ? found.name : active}`;
+        $('#tenant-badge').textContent = `${t('youAreViewing', "You're viewing:")} ${found ? found.name : active}`;
       } catch {}
       const anchor = document.getElementById('dashboard-anchor');
       if (anchor) {
@@ -357,8 +357,8 @@
       });
       const j = await r.json();
   if (!j.ok) { listEl.textContent = j.error || t('queueError','Queue error'); return; }
-      const items = (j.items || []).map(it => `<li><a href="#request/${it.id}">#${it.id}</a> — ${it.category} — ${it.status} — ${it.address}</li>`).join('');
-      listEl.innerHTML = `<ul style="margin:.25rem 0 0 1rem">${items || '<li>No items</li>'}</ul>`;
+  const items = (j.items || []).map(it => `<li><a href="#request/${it.id}">#${it.id}</a> — ${it.category} — ${it.status} — ${it.address}</li>`).join('');
+  listEl.innerHTML = `<ul style="margin:.25rem 0 0 1rem">${items || `<li>${t('queueEmpty','No items')}</li>`}</ul>`;
     } catch (e) {
   listEl.textContent = t('queueLoadFailed','Queue load failed');
     }
