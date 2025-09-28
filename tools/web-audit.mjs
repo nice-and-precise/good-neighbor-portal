@@ -90,12 +90,12 @@ async function run() {
         await page.waitForSelector('[data-i18n="language"]');
         const headingEn = await page.textContent('[data-i18n="language"]');
         const i18nOkEn = !!(headingEn && headingEn.toLowerCase().includes('language'));
-        writeJSON(path.join(outDir, `i18n-check-${ts}.json`), { es: i18nOkEs, en: i18nOkEn, headingEs, headingEn });
+        writeJSON(path.join(outDir, `i18n-check-${ts}.json`), { uiMode: uiMode || 'default', es: i18nOkEs, en: i18nOkEn, headingEs, headingEn });
       } else {
-        writeJSON(path.join(outDir, `i18n-check-${ts}.json`), { skipped: true, reason: 'i18n controls not visible (likely require login)' });
+        writeJSON(path.join(outDir, `i18n-check-${ts}.json`), { uiMode: uiMode || 'default', skipped: true, reason: 'i18n controls not visible (likely require login)' });
       }
     } catch (e) {
-      writeJSON(path.join(outDir, `i18n-check-${ts}.json`), { error: String(e) });
+      writeJSON(path.join(outDir, `i18n-check-${ts}.json`), { uiMode: uiMode || 'default', error: String(e) });
     }
 
     // Mobile emulation (iPhone 12)
@@ -175,9 +175,9 @@ async function run() {
         const passAA = ratio >= 4.5; // normal text threshold
         results[sel] = { present: true, fg: fgCSS, bg: bgCSS, ratio: Number(ratio.toFixed(2)), passAA };
       }
-      writeJSON(path.join(outDir, `contrast-${ts}.json`), results);
+      writeJSON(path.join(outDir, `contrast-${ts}.json`), { uiMode: uiMode || 'default', ...results });
     } catch (e) {
-      writeJSON(path.join(outDir, `contrast-${ts}.json`), { error: String(e) });
+      writeJSON(path.join(outDir, `contrast-${ts}.json`), { uiMode: uiMode || 'default', error: String(e) });
     }
 
     // Write logs

@@ -21,14 +21,14 @@
   }
   async function postJSON(url, data, extraHeaders={}) {
     const headers = { 'Content-Type': 'application/json', ...extraHeaders };
-    if (state.csrf) headers['X-CSRF'] = state.csrf;
+  if (state.csrf) headers['X-CSRF'] = state.csrf;
     if (state.devSession) headers['X-Dev-Session'] = state.devSession;
     const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(data), credentials: 'same-origin' });
     const j = await res.json();
     if (res.status === 403 && j && j.error === 'bad_csrf') {
       const statusEl = document.getElementById('status');
       if (statusEl && !statusEl.textContent) {
-        statusEl.textContent = 'Session cookie missing. If you are viewing in an embedded preview, open in your system browser for full login functionality.';
+        statusEl.textContent = t('sessionCookieMissing', 'Session cookie missing. If you are viewing in an embedded preview, open in your system browser for full login functionality.');
       }
     }
     return j;
@@ -149,7 +149,7 @@
             <hr/>
             <div>
               <h4 style="margin:.25rem 0">${t('staffControlsDemo','Staff controls (demo)')} <span class="badge">${t('demoOnly','DEMO ONLY')}</span></h4>
-              <label>${t('staffHeaderKey','Staff header key')} <input id="staff-key" type="text" placeholder="demo-staff" style="margin-left:.25rem"/></label>
+              <label>${t('staffHeaderKey','Staff header key')} <input id="staff-key" type="text" placeholder="${t('staffKeyPlaceholder','demo-staff')}" style="margin-left:.25rem"/></label>
               <div style="margin-top:.5rem; display:flex; gap:.5rem; flex-wrap:wrap">
                 <button data-action="ack">${t('markAcknowledged','Mark Acknowledged')}</button>
                 <button data-action="in_progress">${t('startWork','Start Work')}</button>
@@ -436,6 +436,25 @@
       const key = el.getAttribute('data-i18n');
       if (!key) return;
       el.textContent = t(key, el.textContent);
+    });
+    // Attribute translations: placeholder, title, aria-label
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+      const key = el.getAttribute('data-i18n-placeholder');
+      if (!key) return;
+      const val = t(key, el.getAttribute('placeholder') || '');
+      if (val) el.setAttribute('placeholder', val);
+    });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+      const key = el.getAttribute('data-i18n-title');
+      if (!key) return;
+      const val = t(key, el.getAttribute('title') || '');
+      if (val) el.setAttribute('title', val);
+    });
+    document.querySelectorAll('[data-i18n-aria-label]').forEach(el => {
+      const key = el.getAttribute('data-i18n-aria-label');
+      if (!key) return;
+      const val = t(key, el.getAttribute('aria-label') || '');
+      if (val) el.setAttribute('aria-label', val);
     });
     // Mark active language toggle button via aria-pressed
     try {

@@ -105,4 +105,14 @@
   "uiModeStandard": "Modo estándar activado"
   ,
   "youAreViewing": "Está viendo:"
+  ,
+  "skipToContent": "Saltar al contenido principal",
+  "languageToggle": "Cambiar idioma",
+  "langEnglish": "Inglés",
+  "langSpanish": "Español",
+  "emailPlaceholder": "usted@ejemplo.com",
+  "demoOnlyTitle": "Solo demostración"
+  ,
+  "sessionCookieMissing": "Falta la cookie de sesión. Si está viendo en una vista previa integrada, ábralo en su navegador del sistema para obtener la funcionalidad completa.",
+  "staffKeyPlaceholder": "demo-staff"
 }

@@ -105,4 +105,14 @@
   "uiModeStandard": "Standard mode on"
   ,
   "youAreViewing": "You're viewing:"
+  ,
+  "skipToContent": "Skip to main content",
+  "languageToggle": "Language toggle",
+  "langEnglish": "English",
+  "langSpanish": "Spanish",
+  "emailPlaceholder": "you@example.com",
+  "demoOnlyTitle": "Demo only"
+  ,
+  "sessionCookieMissing": "Session cookie missing. If you are viewing in an embedded preview, open in your system browser for full login functionality.",
+  "staffKeyPlaceholder": "demo-staff"
 }
