@@ -386,7 +386,11 @@ The project is now in **M7+ polish phase** with advanced features:
 - `README.md`: Basic setup instructions with PowerShell commands
 - `.gitignore`: Excludes config/app.env, data/app.db, logs/, tmp/, exports/
 
-### Documentation Files (35+ total .md files)
+### Documentation Files (38 total .md files)
+
+_To verify or update this count, run:_
+```sh
+find . -type f -name "*.md" | wc -l
 **Core Spec-Kit docs** (docs/): constitution.md, spec.md, plan.md, tasks.md, decisions.md, analyze.md, clarify.md, plus ARCHITECTURE.md, API.md, DEVELOPMENT.md, etc.  
 **Copilot prompts** (.github/prompts/): 8 slash command files  
 **Templates** (.specify/templates/): 4 spec-kit templates  
