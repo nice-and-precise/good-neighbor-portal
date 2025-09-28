@@ -6,8 +6,8 @@ require_once __DIR__ . '/../../src/Lib/Db.php';
 require_once __DIR__ . '/../../src/Lib/Http.php';
 
 // CSV export of route summary derived from service_requests by service day (demo approximation)
-session_start();
 $config = new Config();
+Http::startSession($config);
 Http::method('GET');
 
 $uid = $_SESSION['user_id'] ?? null;

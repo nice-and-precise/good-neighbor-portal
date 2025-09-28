@@ -92,4 +92,7 @@
   "statusInProgress": "In progress",
   "statusDone": "Done",
   "statusCancelled": "Cancelled"
+  ,
+  "notAuthorizedStaffNote": "Not authorized. Enter the demo staff key to add notes.",
+  "notAuthorizedStaffStatus": "Not authorized. Enter the demo staff key to update status."
 }

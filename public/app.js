@@ -3,18 +3,39 @@
   const $ = (s) => document.querySelector(s);
 
   async function getJSON(url, opts={}) {
-    const res = await fetch(url, { credentials: 'same-origin', ...opts });
+    // Attach dev session header if present
+    const headers = { ...(opts.headers || {}) };
+    if (state.devSession) headers['X-Dev-Session'] = state.devSession;
+    const res = await fetch(url, { credentials: 'same-origin', ...opts, headers });
     return res.json();
   }
   async function postJSON(url, data, extraHeaders={}) {
     const headers = { 'Content-Type': 'application/json', ...extraHeaders };
     if (state.csrf) headers['X-CSRF'] = state.csrf;
+    if (state.devSession) headers['X-Dev-Session'] = state.devSession;
     const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(data), credentials: 'same-origin' });
-    return res.json();
+    const j = await res.json();
+    if (res.status === 403 && j && j.error === 'bad_csrf') {
+      const statusEl = document.getElementById('status');
+      if (statusEl && !statusEl.textContent) {
+        statusEl.textContent = 'Session cookie missing. If you are viewing in an embedded preview, open in your system browser for full login functionality.';
+      }
+    }
+    return j;
   }
 
   async function init() {
     try {
+      // Clear status early so no placeholder text lingers
+      const statusEl = document.getElementById('status');
+      if (statusEl) statusEl.textContent = '';
+      // If the environment is blocking cookies, warn early (Simple Browser sometimes does)
+      document.cookie = 'gnp_test=1; SameSite=Lax; path=/';
+      const cookieEnabled = document.cookie.indexOf('gnp_test=1') !== -1;
+      // If cookies look blocked, synthesize a dev session id and send via header for dev-only fallback
+      if (!cookieEnabled && !state.devSession) {
+        state.devSession = (Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)).slice(0, 24);
+      }
       const csrf = await getJSON('/api/csrf.php');
       state.csrf = csrf.csrf;
       const tns = await getJSON('/api/tenants.php');
@@ -24,6 +45,11 @@
       $('#status').textContent = '';
       await loadI18n();
       applyI18n();
+      if (!cookieEnabled) {
+        // Provide a clear, non-blocking hint
+        const msg = 'Heads up: Your environment may be blocking cookies. Login may fail here. Open in your system browser for full functionality.';
+        if (statusEl && !statusEl.textContent) statusEl.textContent = msg;
+      }
     } catch (e) {
       console.error('Init failed', e);
       $('#status').textContent = t('initFailed','Init failed. Check server.');
@@ -119,7 +145,7 @@
               <div style="margin-top:.5rem">
                 <input id="note-text" type="text" placeholder="${t('addStaffNotePlaceholder','Add staff note...')}" style="width:70%"/>
                 <button id="note-add">${t('addNote','Add Note')}</button>
-                <div id="note-status" class="muted" style="margin-top:.25rem"></div>
+                <div id="note-status" class="muted" role="status" aria-live="polite" style="margin-top:.25rem"></div>
               </div>
             </div>
             <div style="margin-top:.75rem">
@@ -131,12 +157,19 @@
           const back = document.getElementById('back-link');
           if (back) back.addEventListener('click', (e) => { e.preventDefault(); stopPolling(); location.hash = ''; });
           const keyInput = document.getElementById('staff-key');
+          // Mirror key with Staff Queue input if present (two-way)
+          const queueKeyInput = document.getElementById('queue-staff-key');
+          if (queueKeyInput && keyInput) {
+            if (!keyInput.value) keyInput.value = queueKeyInput.value || 'demo-staff';
+            keyInput.addEventListener('input', () => { queueKeyInput.value = keyInput.value; });
+            queueKeyInput.addEventListener('input', () => { keyInput.value = queueKeyInput.value; });
+          }
           const noteInput = document.getElementById('note-text');
           const noteStatus = document.getElementById('note-status');
           const btns = el.querySelectorAll('button[data-action]');
           btns.forEach(b => b.addEventListener('click', async () => {
             const action = b.getAttribute('data-action');
-            const k = (keyInput && keyInput.value.trim()) || 'demo-staff';
+            const k = (keyInput && keyInput.value.trim()) || (queueKeyInput && queueKeyInput.value.trim()) || 'demo-staff';
             b.disabled = true;
             const res = await postJSON('/api/request_status_update.php', { id: Number(id), action }, { 'X-Staff-Key': k });
             b.disabled = false;
@@ -144,19 +177,25 @@
               await loadRequestDetail(id);
               showToast(t('statusUpdated','Request status updated.'), 'success');
             } else {
-              showToast(res.error || t('statusUpdateFailed','Status update failed'), 'error');
+              // Friendly localized message for staff auth
+              const msg = (res.error === 'forbidden') ? t('notAuthorizedStaffStatus','Not authorized. Enter the demo staff key to update status.') : (res.error || t('statusUpdateFailed','Status update failed'));
+              showToast(msg, 'error');
             }
           }));
           const addBtn = document.getElementById('note-add');
           if (addBtn) addBtn.addEventListener('click', async () => {
             const note = (noteInput && noteInput.value.trim()) || '';
-            const k = (keyInput && keyInput.value.trim()) || 'demo-staff';
+            const k = (keyInput && keyInput.value.trim()) || (queueKeyInput && queueKeyInput.value.trim()) || 'demo-staff';
             if (!note) { noteStatus.textContent = t('enterNoteFirst','Enter a note first.'); return; }
             addBtn.disabled = true;
             const res = await postJSON('/api/request_note_create.php', { request_id: Number(id), note }, { 'X-Staff-Key': k });
             addBtn.disabled = false;
             if (res.ok) { noteInput.value = ''; noteStatus.textContent = t('noteAdded','Note added.'); showToast(t('noteAdded','Note added.'), 'success'); await loadRequestNotes(id); }
-            else { noteStatus.textContent = res.error || t('noteFailed','Note failed'); showToast(res.error || t('noteFailed','Note failed'), 'error'); }
+            else {
+              const msg = (res.error === 'forbidden') ? t('notAuthorizedStaffNote','Not authorized. Enter the demo staff key to add notes.') : (res.error || t('noteFailed','Note failed'));
+              noteStatus.textContent = msg;
+              showToast(msg, 'error');
+            }
           });
           // Initial loads and polling
           await loadRequestNotes(id);
@@ -221,7 +260,8 @@
   $('#status').textContent = res.ok ? t('loggedIn','Logged in.') : (res.error || t('error','error'));
     if (res.ok) {
       state.loggedIn = true;
-      $('#authed').style.display = '';
+      // Explicitly override CSS rule '#authed { display:none }'
+      $('#authed').style.display = 'block';
       await Promise.all([loadDashboard(), loadActivity()]);
   // Load staff queue default silently
   try { await loadStaffQueue(); } catch {}

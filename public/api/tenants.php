@@ -6,8 +6,8 @@ require_once __DIR__ . '/../../src/Lib/Db.php';
 require_once __DIR__ . '/../../src/Lib/Util.php';
 require_once __DIR__ . '/../../src/Lib/Http.php';
 
-session_start();
 $config = new Config();
+Http::startSession($config);
 Http::method('GET');
 
 $tenantSlug = isset($_GET['tenant']) && $_GET['tenant'] !== '' ? $_GET['tenant'] : 'willmar-mn';

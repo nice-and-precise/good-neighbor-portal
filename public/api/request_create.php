@@ -7,8 +7,8 @@ require_once __DIR__ . '/../../src/Lib/Util.php';
 require_once __DIR__ . '/../../src/Lib/Http.php';
 require_once __DIR__ . '/../../src/Lib/Validator.php';
 
-session_start();
 $config = new Config();
+Http::startSession($config);
 Http::method('POST');
 Http::requireCsrf($config);
 

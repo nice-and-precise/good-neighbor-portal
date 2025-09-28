@@ -92,4 +92,7 @@
   "statusInProgress": "En progreso",
   "statusDone": "Hecho",
   "statusCancelled": "Cancelado"
+  ,
+  "notAuthorizedStaffNote": "No autorizado. Ingrese la clave de personal de demostración para agregar notas.",
+  "notAuthorizedStaffStatus": "No autorizado. Ingrese la clave de personal de demostración para actualizar el estado."
 }
