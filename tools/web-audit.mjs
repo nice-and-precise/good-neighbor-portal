@@ -23,7 +23,8 @@ async function run() {
   await ensureDir(outDir);
 
   const url = process.env.TARGET_URL || 'http://127.0.0.1:8080/';
-  const uiMode = (process.env.UI_MODE || '').toLowerCase();
+  const argMode = (process.argv[2] || '').toLowerCase();
+  const uiMode = (process.env.UI_MODE || argMode || '').toLowerCase();
 
   // Import playwright lazily to allow workflow to install it
   const { chromium, devices } = await import('playwright');
