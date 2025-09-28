@@ -107,7 +107,7 @@ pwsh -File .specify/scripts/powershell/setup.ps1
 ```bash
 # Manual setup that always works:
 cp config/app.example.env config/app.env
-php tools/setup.php
+php -r "copy('.specify/scripts/php/setup.template.php', 'config/setup.php'); include 'config/setup.php';"
 ```
 
 ### Development Server
