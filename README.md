@@ -1,36 +1,113 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Good Neighbor Portal 🚛♻️
 
-## Getting Started
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Next.js](https://img.shields.io/badge/Next.js-16.0-black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.0-38B2AC)
 
-First, run the development server:
+The **Good Neighbor Portal** is a modern, customer-centric web application designed for West Central Sanitation. It empowers residential and commercial customers to manage their accounts, view service history, and track service trucks in real-time.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## 🌟 Key Features
+
+- **🔐 Secure Authentication**: Simulated login flow with role-based access.
+- **📊 Interactive Dashboard**: At-a-glance view of service schedules, billing status, and community news.
+- **🚚 Live Truck Tracking**: Real-time GPS tracking of service vehicles with ETA predictions.
+- **📜 Service History**: Comprehensive log of past pickups and payments.
+- **👤 Profile Management**: Easy updates for contact information and preferences.
+- **📱 Responsive Design**: Fully optimized for desktop, tablet, and mobile devices.
+
+---
+
+## 🏗️ Architecture
+
+### System Overview
+```mermaid
+graph TD
+    User[Customer] -->|Access| WebApp[Next.js Web App]
+    WebApp -->|Auth| AuthModule[Authentication]
+    WebApp -->|Data| MockDB[(Mock Data Store)]
+    WebApp -->|Maps| Leaflet[Leaflet Maps]
+    
+    subgraph "Frontend Layer"
+        WebApp
+        AuthModule
+        Leaflet
+    end
+
+    subgraph "Data Layer"
+        MockDB
+    end
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### User Journey
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant L as Login Page
+    participant D as Dashboard
+    participant T as Tracking Page
+    
+    U->>L: Enter Credentials
+    L->>D: Authenticate & Redirect
+    D->>U: Show Service Schedule
+    U->>D: Click "Track My Truck"
+    D->>T: Navigate
+    T->>U: Show Live Map & ETA
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🚀 Getting Started
 
-## Learn More
+### Prerequisites
+- Node.js 18+
+- npm or yarn
 
-To learn more about Next.js, take a look at the following resources:
+### Installation
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-username/good-neighbor-portal.git
+   cd good-neighbor-portal
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-## Deploy on Vercel
+3. **Run the development server**
+   ```bash
+   npm run dev
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+4. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## 🛠️ Tech Stack
+
+- **Framework**: [Next.js 16](https://nextjs.org/) (App Router)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Maps**: [React Leaflet](https://react-leaflet.js.org/)
+
+---
+
+## 📸 Screenshots
+
+*(Placeholders for future screenshots)*
+
+| Dashboard | Tracking |
+|:---:|:---:|
+| ![Dashboard Preview](https://via.placeholder.com/400x200?text=Dashboard+UI) | ![Tracking Preview](https://via.placeholder.com/400x200?text=Live+Tracking+UI) |
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
